@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import { serverSupabase } from '../../../../lib/serverSupabase'
-import { getUserIdFromRequest } from '../../../../lib/auth'
+import { serverSupabase } from '../../../lib/serverSupabase'
+import { getUserIdFromRequest } from '../../../lib/auth'
 
 /**
  * GET /api/tasks

@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server'
-import { serverSupabase } from '../../../../../lib/serverSupabase'
-import { getUserIdFromRequest } from '../../../../../lib/auth'
+import { NextRequest, NextResponse } from 'next/server'
+import { serverSupabase } from '../../../../lib/serverSupabase'
+import { getUserIdFromRequest } from '../../../../lib/auth'
 
 interface UpdateTaskBody {
   completed?: boolean
@@ -27,11 +27,11 @@ interface UpdateTaskBody {
  * }
  */
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const taskId = params.id
+    const { id: taskId } = await params
 
     if (!taskId) {
       return NextResponse.json(

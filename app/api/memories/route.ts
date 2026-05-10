@@ -3,6 +3,19 @@ import { serverSupabase } from '../../../lib/serverSupabase'
 import { getUserIdFromRequest } from '../../../lib/auth'
 
 type GroupedMemories = Record<string, any[]>
+type MemoryRow = {
+  id: string
+  text: string
+  half_baked: boolean
+  metadata: Record<string, unknown>
+  created_at: string
+  discovery_hint?: {
+    related_memory_id: string
+    similarity: number
+    days_ago: number
+    snippet: string
+  }
+}
 
 /**
  * Format date to "YYYY-MM-DD" for grouping
@@ -94,7 +107,7 @@ export async function GET(request: Request) {
     }
 
     // Fetch memories ordered by created_at DESC (newest first)
-    const { data: memories, error: memErr } = await serverSupabase
+    const { data: memoryRows, error: memErr } = await serverSupabase
       .from('memories')
       .select('id, text, half_baked, metadata, created_at')
       .eq('user_id', userId)
@@ -108,6 +121,8 @@ export async function GET(request: Request) {
         { status: 500 }
       )
     }
+
+    const memories = (memoryRows || []) as MemoryRow[]
 
     // Compute discovery hints (search a larger recent window and use a higher similarity threshold)
     try {

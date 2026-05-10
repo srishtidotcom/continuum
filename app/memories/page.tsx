@@ -1,7 +1,6 @@
 "use client"
 
-import Input from '../components/Input'
-import SearchComponent from '../components/Search'
+import SearchComponent from '../../components/Search'
 
 export default function MemoriesPage() {
   return (

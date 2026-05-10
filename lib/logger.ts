@@ -52,12 +52,14 @@ class Logger {
 
   error(message: string, context?: LogContext): void {
     const errorContext = {
-      ...context,
-      ...(context?.error && {
-        errorMessage:
-          context.error instanceof Error ? context.error.message : String(context.error),
-        errorStack: context.error instanceof Error ? context.error.stack : undefined
-      })
+      ...(context ?? {}),
+      ...(context?.error
+        ? {
+            errorMessage:
+              context.error instanceof Error ? context.error.message : String(context.error),
+            errorStack: context.error instanceof Error ? context.error.stack : undefined
+          }
+        : {})
     }
     this.formatLog('error', message, errorContext)
   }

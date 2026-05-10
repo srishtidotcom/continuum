@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { serverSupabase } from '../../../../lib/serverSupabase'
-import { extractTasksFromMemory, detectTaskKeywords } from '../../../../lib/taskExtraction'
-import { generateEmbedding } from '../../../../lib/openaiUtils'
-import { getOpenAIApiKey } from '../../../../lib/envValidation'
-import { logger } from '../../../../lib/logger'
-import { extractUserId } from '../../../../lib/authUtils'
-import { API_ROUTES, DB_TABLES, ERROR_MESSAGES, HTTP_STATUS } from '../../../../lib/constants'
-import { validateTaskResponse } from '../../../../lib/taskValidation'
+import { serverSupabase } from '../../../lib/serverSupabase'
+import { extractTasksFromMemory, detectTaskKeywords } from '../../../lib/taskExtraction'
+import { generateEmbedding } from '../../../lib/openaiUtils'
+import { getOpenAIApiKey } from '../../../lib/envValidation'
+import { logger } from '../../../lib/logger'
+import { extractUserId } from '../../../lib/authUtils'
+import { API_ROUTES, DB_TABLES, ERROR_MESSAGES, HTTP_STATUS } from '../../../lib/constants'
+import { validateTaskResponse } from '../../../lib/taskValidation'
 
 interface Body {
   text: string
