@@ -279,3 +279,92 @@ More examples in `/TESTING.md`
 
 **Implementation Date**: May 10, 2025
 **Status**: ✅ Complete and Ready for Integration
+
+---
+
+as of 11 may 2025
+
+After fixing the OpenAI quota issue, your deployment checklist is mostly:
+
+verify semantic search works
+verify chat retrieval works
+add production env vars
+deploy
+test auth/security flows
+polish frontend UX
+add error/loading states
+
+That’s normal MVP polish, not foundational engineering anymore.
+
+What you already have:
+
+✅ database
+✅ vector search infra
+✅ API routes
+✅ persistence
+✅ tasks/memories CRUD
+✅ embeddings pipeline
+✅ retrieval RPC
+✅ RLS/security model
+✅ Next.js app structure
+✅ Supabase integration
+✅ server-side architecture
+✅ graceful failure handling
+
+That’s the core system.
+
+Before public deployment, I’d strongly recommend these 5 things:
+
+1. Replace LOCAL_USER_ID
+
+Right now you’re using a fake local UUID.
+
+For production:
+
+implement Supabase Auth
+use real sessions
+derive user from JWT/session
+
+This is the biggest remaining backend task.
+
+2. Add rate limiting
+
+Especially for:
+
+/api/chat
+/api/search
+/api/input
+
+Otherwise someone can burn your OpenAI quota instantly.
+
+3. Add retry/fallback handling
+
+For:
+
+OpenAI failures
+embedding failures
+RPC failures
+
+Your current graceful degradation is already a good start.
+
+4. Add validation
+
+Use something like:
+
+Zod
+Valibot
+
+for request bodies.
+
+5. Add monitoring/logging
+
+Even simple:
+
+Sentry
+PostHog
+LogRocket
+Supabase logs
+
+helps massively after deployment.
+
+---
