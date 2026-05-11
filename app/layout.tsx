@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         Continuum
                       </h1>
                       <p className="mt-1 hidden text-[11px] uppercase tracking-[0.24em] text-[color:var(--color-faint)] sm:block">
-                        Conversational memory
+                        Your second brain
                       </p>
                     </div>
                   </div>
