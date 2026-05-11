@@ -37,9 +37,12 @@ export default function AuthButton() {
 
   if (user) {
     return (
-      <div className="flex items-center gap-2">
-        <div className="text-sm text-zinc-300">{user.email}</div>
-        <button className="text-sm px-3 py-1 border rounded" onClick={signOut}>
+      <div className="flex min-w-0 items-center gap-2">
+        <div className="hidden max-w-[220px] truncate text-sm text-[color:var(--color-muted)] sm:block">{user.email}</div>
+        <button
+          className="rounded-[var(--radius-soft)] border border-[color:var(--color-border)] bg-white/[0.035] px-3 py-1 text-sm text-[color:var(--color-muted)] hover:border-[color:var(--color-border-strong)] hover:text-[color:var(--color-text)]"
+          onClick={signOut}
+        >
           Sign out
         </button>
       </div>
@@ -47,7 +50,10 @@ export default function AuthButton() {
   }
 
   return (
-    <button className="text-sm px-3 py-1 bg-white text-black rounded" onClick={signIn}>
+    <button
+      className="rounded-[var(--radius-soft)] bg-[color:var(--color-text)] px-3 py-1 text-sm font-semibold text-[color:var(--color-bg)] hover:bg-[color:var(--color-accent)]"
+      onClick={signIn}
+    >
       Sign in
     </button>
   )

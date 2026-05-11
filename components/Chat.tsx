@@ -145,14 +145,14 @@ export default function Chat() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-black rounded-lg border border-zinc-800">
+    <div className="continuum-panel flex h-full flex-col overflow-hidden rounded-[var(--radius-soft)]">
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="continuum-scrollbar flex-1 space-y-4 overflow-y-auto overflow-x-hidden p-4">
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full">
-            <div className="text-center text-zinc-600">
-              <p className="mb-2">Ask Continuum about your memories...</p>
-              <p className="text-xs text-zinc-700">
+            <div className="text-center text-[color:var(--color-faint)]">
+              <p className="font-display mb-2 text-2xl text-[color:var(--color-muted)]">Reflect with Continuum</p>
+              <p className="text-xs leading-5">
                 Try: "What have I been thinking about lately?" or "Find recurring themes"
               </p>
             </div>
@@ -165,7 +165,7 @@ export default function Chat() {
             className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             {msg.role === 'assistant' && (
-              <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0 text-xs">
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-[color:var(--color-border)] bg-white/[0.035] text-xs text-[color:var(--color-muted)]">
                 C
               </div>
             )}
@@ -173,24 +173,24 @@ export default function Chat() {
             <div
               className={`max-w-lg ${
                 msg.role === 'user'
-                  ? 'bg-white text-black rounded-lg p-3'
-                  : 'bg-zinc-900 text-zinc-100 rounded-lg p-3 border border-zinc-800'
+                  ? 'rounded-[var(--radius-soft)] bg-[color:var(--color-text)] p-3 text-[color:var(--color-bg)]'
+                  : 'rounded-[var(--radius-soft)] border border-[color:var(--color-border)] bg-white/[0.035] p-3 text-[color:var(--color-text)]'
               }`}
             >
               <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
 
               {/* Relevant Memories Section */}
               {msg.relevantMemories && msg.relevantMemories.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-zinc-700 text-xs">
-                  <p className="text-zinc-500 mb-2 font-medium">Referenced memories:</p>
+                <div className="mt-3 border-t border-[color:var(--color-border)] pt-3 text-xs">
+                  <p className="mb-2 font-medium text-[color:var(--color-faint)]">Referenced memories:</p>
                   <div className="space-y-1">
                     {msg.relevantMemories.slice(0, 3).map((mem) => (
                       <div
                         key={mem.id}
-                        className="text-zinc-600 hover:text-zinc-400 transition line-clamp-2 cursor-pointer"
+                        className="line-clamp-2 cursor-pointer text-[color:var(--color-faint)] hover:text-[color:var(--color-muted)]"
                         title={mem.text}
                       >
-                        <span className="text-zinc-700">
+                        <span className="text-[color:var(--color-faint)]">
                           {new Date(mem.created_at).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric'
@@ -204,7 +204,7 @@ export default function Chat() {
                 </div>
               )}
 
-              <div className="mt-2 text-xs text-zinc-600">
+              <div className="mt-2 text-xs text-[color:var(--color-faint)]">
                 {msg.timestamp && new Date(msg.timestamp).toLocaleTimeString('en-US', {
                   hour: '2-digit',
                   minute: '2-digit'
@@ -213,7 +213,7 @@ export default function Chat() {
             </div>
 
             {msg.role === 'user' && (
-              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center flex-shrink-0 text-xs text-black font-bold">
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[color:var(--color-accent)] text-xs font-bold text-[color:var(--color-bg)]">
                 U
               </div>
             )}
@@ -222,14 +222,14 @@ export default function Chat() {
 
         {loading && (
           <div className="flex gap-3 justify-start">
-            <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0 text-xs">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-[color:var(--color-border)] bg-white/[0.035] text-xs text-[color:var(--color-muted)]">
               C
             </div>
-            <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-3">
+            <div className="rounded-[var(--radius-soft)] border border-[color:var(--color-border)] bg-white/[0.035] p-3">
               <div className="flex gap-1">
-                <div className="w-2 h-2 bg-zinc-600 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-zinc-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-zinc-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-[color:var(--color-faint)]"></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-[color:var(--color-faint)]" style={{ animationDelay: '0.1s' }}></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-[color:var(--color-faint)]" style={{ animationDelay: '0.2s' }}></div>
               </div>
             </div>
           </div>
@@ -239,20 +239,20 @@ export default function Chat() {
       </div>
 
       {/* Input Form */}
-      <form onSubmit={handleSubmit} className="border-t border-zinc-800 p-4">
+      <form onSubmit={handleSubmit} className="border-t border-[color:var(--color-border)] p-4">
         <div className="flex gap-2">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask about your memories... (e.g., 'What have I been thinking about?')"
-            className="flex-1 bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-sm placeholder-zinc-600 focus:outline-none focus:border-zinc-700 text-white"
+            className="min-w-0 flex-1 rounded-[var(--radius-soft)] border border-[color:var(--color-border)] bg-white/[0.035] px-3 py-2 text-sm text-[color:var(--color-text)] placeholder:text-[color:var(--color-faint)] focus:border-[color:var(--color-border-strong)] focus:outline-none"
             disabled={loading}
           />
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="bg-white text-black px-4 py-2 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-100 transition"
+            className="rounded-[var(--radius-soft)] bg-[color:var(--color-text)] px-4 py-2 text-sm font-semibold text-[color:var(--color-bg)] hover:bg-[color:var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {loading ? 'Thinking...' : 'Ask'}
           </button>

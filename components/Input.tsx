@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useToast } from '../lib/useToast'
 
 interface LinkMetadata {
@@ -15,50 +15,19 @@ export default function Input() {
   const [text, setText] = useState('')
   const [halfBaked, setHalfBaked] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [autoSaveInterval, setAutoSaveInterval] = useState(30)
   const [isRecording, setIsRecording] = useState(false)
   const [transcribing, setTranscribing] = useState(false)
   const [ariaMessage, setAriaMessage] = useState('')
   const [linkMetadata, setLinkMetadata] = useState<LinkMetadata[]>([])
+  const [placeholder] = useState(() => {
+    const options = ['Dump your brain here...', "What's on your mind?", 'Half-formed thoughts welcome.']
+    return options[Math.floor(Math.random() * options.length)]
+  })
   const { addToast } = useToast()
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Load settings on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('continuum-settings')
-    if (saved) {
-      const settings = JSON.parse(saved)
-      setAutoSaveInterval(settings.autoSaveInterval || 30)
-    }
-  }, [])
-
-  // Auto-save effect
-  useEffect(() => {
-    if (!text.trim()) {
-      if (autoSaveTimeoutRef.current) clearTimeout(autoSaveTimeoutRef.current)
-      return
-    }
-
-    // Clear previous timeout
-    if (autoSaveTimeoutRef.current) {
-      clearTimeout(autoSaveTimeoutRef.current)
-    }
-
-    // Set new timeout for auto-save
-    autoSaveTimeoutRef.current = setTimeout(() => {
-      if (text.trim()) {
-        submit()
-      }
-    }, autoSaveInterval * 1000)
-
-    return () => {
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current)
-      }
-    }
-  }, [text, autoSaveInterval])
+  const textRef = useRef('')
+  const submittingRef = useRef(false)
 
   // Extract metadata from pasted links
   const extractLinkMetadata = async (content: string) => {
@@ -90,6 +59,7 @@ export default function Input() {
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newText = e.target.value
     setText(newText)
+    textRef.current = newText
     
     // Check for links in the new text
     if (newText.includes('http')) {
@@ -111,7 +81,7 @@ export default function Input() {
 
       mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' })
-        setAriaMessage('Recording stopped. Transcribing audio.')
+        setAriaMessage('Recording stopped. Transcribing audio and saving.')
         await transcribeAudio(audioBlob)
         stream.getTracks().forEach((track) => track.stop())
       }
@@ -149,15 +119,17 @@ export default function Input() {
       if (response.ok) {
         const data = await response.json()
         // Append transcribed text to existing text
-        const newText = text + (text ? ' ' : '') + data.text
+        const existingText = textRef.current
+        const newText = existingText + (existingText ? ' ' : '') + data.text
         setText(newText)
+        textRef.current = newText
         
         // Extract metadata if there are links
         if (newText.includes('http')) {
           await extractLinkMetadata(newText)
         }
-        addToast('Audio transcribed successfully', 'success', 3000)
-        setAriaMessage('Transcription completed')
+        await submit(undefined, newText)
+        setAriaMessage('Transcription completed and saved')
       } else {
         const error = await response.json()
         addToast(`Transcription failed: ${error.error || 'Unknown error'}`, 'error', 6000)
@@ -172,15 +144,17 @@ export default function Input() {
     }
   }
 
-  async function submit(e?: React.FormEvent) {
+  async function submit(e?: React.FormEvent, overrideText?: string) {
     if (e) e.preventDefault()
-    if (!text.trim()) return
+    const content = overrideText ?? textRef.current
+    if (!content.trim() || submittingRef.current) return
+    submittingRef.current = true
     setSaving(true)
     try {
       const res = await fetch('/api/input', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, halfBaked })
+        body: JSON.stringify({ text: content, halfBaked })
       })
       
       if (!res.ok) {
@@ -190,7 +164,10 @@ export default function Input() {
       }
       
       const data = await res.json()
-      setText('')
+      if (textRef.current === content) {
+        setText('')
+        textRef.current = ''
+      }
       setLinkMetadata([])
       
       // Show success with any warnings
@@ -205,47 +182,47 @@ export default function Input() {
       console.error(err)
     } finally {
       setSaving(false)
+      submittingRef.current = false
     }
   }
 
   return (
     <div className="space-y-4">
-      <form onSubmit={submit} className="space-y-2">
+      <form onSubmit={submit} className="continuum-input rounded-[var(--radius-soft)] p-3 md:p-4">
         <textarea
-          className="w-full bg-zinc-900 border border-zinc-800 rounded p-3 min-h-[96px] resize-none focus:border-zinc-700 focus:outline-none transition"
-          placeholder="Dump your brain here. Half-formed thoughts welcome."
+          className="min-h-[132px] w-full resize-none bg-transparent px-2 py-3 text-lg leading-8 text-[color:var(--color-text)] placeholder:text-[color:var(--color-faint)] focus:outline-none md:min-h-[156px] md:px-4 md:text-xl"
+          placeholder={placeholder}
           value={text}
           onChange={handleTextChange}
           onPaste={handlePaste}
+          onBlur={() => submit()}
         />
 
         {/* Link Metadata Display */}
         {linkMetadata.length > 0 && (
-          <div className="space-y-2">
+          <div className="space-y-2 px-2 pb-2 md:px-4">
             {linkMetadata.map((link, idx) => (
               <div
                 key={idx}
-                className="p-3 bg-zinc-800 border border-zinc-700 rounded text-xs space-y-1"
+                className="space-y-1 rounded-[var(--radius-soft)] border border-[color:var(--color-border)] bg-white/[0.035] p-3 text-xs"
               >
-                <div className="font-medium text-zinc-300">{link.title || link.domain}</div>
-                {link.description && (
-                  <div className="text-zinc-400 line-clamp-2">{link.description}</div>
-                )}
-                <div className="text-zinc-500">{link.url}</div>
+                <div className="font-medium text-[color:var(--color-text)]">{link.title || link.domain}</div>
+                {link.description && <div className="line-clamp-2 text-[color:var(--color-muted)]">{link.description}</div>}
+                <div className="text-[color:var(--color-faint)]">{link.url}</div>
               </div>
             ))}
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-4 border-t border-[color:var(--color-border)] px-2 pt-3 sm:flex-row sm:items-center sm:justify-between md:px-4">
+          <div className="flex flex-wrap items-center gap-3">
             {/* Half-baked checkbox */}
-            <label className="flex items-center gap-2 text-sm text-zinc-400 cursor-pointer">
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-[color:var(--color-muted)]">
               <input
                 type="checkbox"
                 checked={halfBaked}
                 onChange={() => setHalfBaked(!halfBaked)}
-                className="w-4 h-4"
+                className="h-4 w-4 accent-[color:var(--color-accent)]"
               />
               Half-baked
             </label>
@@ -257,42 +234,42 @@ export default function Input() {
               disabled={transcribing}
               aria-pressed={isRecording}
               aria-label={isRecording ? 'Stop recording' : transcribing ? 'Transcribing' : 'Start voice input'}
-              className={`px-3 py-1 rounded text-sm transition inline-flex items-center ${
+              className={`inline-flex h-9 items-center rounded-[var(--radius-soft)] border px-3 text-sm ${
                 isRecording
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
+                  ? 'border-red-300/30 bg-red-500/15 text-red-100'
                   : transcribing
-                    ? 'bg-zinc-700 text-zinc-400'
-                    : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                    ? 'border-[color:var(--color-border)] bg-white/[0.04] text-[color:var(--color-faint)]'
+                    : 'border-[color:var(--color-border)] bg-white/[0.035] text-[color:var(--color-muted)] hover:border-[color:var(--color-border-strong)] hover:text-[color:var(--color-text)]'
               }`}
             >
               {transcribing ? (
-                <>🎙️ Transcribing...</>
+                <>Transcribing...</>
               ) : isRecording ? (
                 <>
-                  <span className="inline-block w-2 h-2 rounded-full bg-white/30 mr-2" aria-hidden="true" />
-                  ⊚ Recording...
+                  <span className="mr-2 inline-block h-2 w-2 rounded-full bg-red-200" aria-hidden="true" />
+                  Recording
                 </>
               ) : (
                 <>
-                  <span className="inline-block w-2 h-2 rounded-full bg-red-600 animate-pulse mr-2" aria-hidden="true" />
-                  🎤 Voice
+                  <span className="mr-2 inline-block h-2 w-2 rounded-full bg-[color:var(--color-accent)]/70" aria-hidden="true" />
+                  Voice
                 </>
               )}
             </button>
           </div>
 
           {/* Save button */}
-          <div>
+          <div className="flex items-center justify-end gap-3">
+            <div className="text-xs text-[color:var(--color-faint)]">
+              Saves on blur
+            </div>
             <button
               type="submit"
-              className="bg-white text-black px-4 py-1 rounded text-sm hover:bg-zinc-100 transition disabled:bg-zinc-600"
+              className="h-9 rounded-[var(--radius-soft)] bg-[color:var(--color-text)] px-5 text-sm font-semibold text-[color:var(--color-bg)] hover:bg-[color:var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-40"
               disabled={saving || !text.trim()}
             >
               {saving ? 'Saving...' : 'Save'}
             </button>
-            <div className="text-xs text-zinc-500 mt-1 text-right">
-              Auto-save in {autoSaveInterval}s
-            </div>
           </div>
         </div>
       </form>

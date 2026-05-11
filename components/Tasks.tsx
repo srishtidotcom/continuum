@@ -43,33 +43,33 @@ export default function Tasks() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Header with Stats */}
       <div className="space-y-2">
-        <h2 className="text-lg font-semibold">Tasks</h2>
-        <div className="flex gap-2 text-xs">
-          <div className="px-3 py-1 bg-zinc-900 border border-zinc-800 rounded">
+        <h2 className="font-display text-3xl font-medium text-[color:var(--color-text)]">Tasks</h2>
+        <div className="flex flex-wrap gap-2 text-xs text-[color:var(--color-muted)]">
+          <div className="rounded-full border border-[color:var(--color-border)] bg-white/[0.035] px-3 py-1">
             {stats.total} total
           </div>
-          <div className="px-3 py-1 bg-blue-900 border border-blue-800 rounded text-blue-200">
+          <div className="rounded-full border border-sky-200/10 bg-sky-300/10 px-3 py-1 text-sky-100/80">
             {stats.active} active
           </div>
-          <div className="px-3 py-1 bg-green-900 border border-green-800 rounded text-green-200">
+          <div className="rounded-full border border-emerald-200/10 bg-emerald-300/10 px-3 py-1 text-emerald-100/80">
             {stats.completed} done
           </div>
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex gap-2 border-b border-zinc-800">
+      <div className="flex gap-2 border-b border-[color:var(--color-border)]">
         {(['all', 'active', 'completed'] as const).map((f) => (
           <button
             key={f}
             onClick={() => handleFilterChange(f)}
-            className={`px-3 py-2 text-sm font-medium border-b-2 -mb-[2px] transition ${
+            className={`-mb-[1px] border-b px-3 py-2 text-sm font-medium ${
               filter === f
-                ? 'border-white text-white'
-                : 'border-transparent text-zinc-500 hover:text-zinc-300'
+                ? 'border-[color:var(--color-accent)] text-[color:var(--color-text)]'
+                : 'border-transparent text-[color:var(--color-faint)] hover:text-[color:var(--color-muted)]'
             }`}
           >
             {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -79,27 +79,27 @@ export default function Tasks() {
 
       {/* Error State */}
       {error && (
-        <div className="p-3 bg-red-900 border border-red-700 rounded text-sm text-red-100">
+        <div className="rounded-[var(--radius-soft)] border border-red-300/20 bg-red-500/10 p-3 text-sm text-red-100">
           Error loading tasks: {error}
         </div>
       )}
 
       {/* Loading State */}
       {loading && (
-        <div className="text-center py-8 text-zinc-500">
+        <div className="py-8 text-center text-[color:var(--color-faint)]">
           Loading tasks...
         </div>
       )}
 
       {/* Empty State */}
       {!loading && filteredTasks.length === 0 && (
-        <div className="text-center py-8 text-zinc-600">
-          <p className="mb-2">No {filter === 'all' ? '' : filter} tasks yet.</p>
-          <p className="text-xs text-zinc-700">
+        <div className="py-12 text-center text-[color:var(--color-faint)]">
+          <p className="font-display mb-2 text-2xl text-[color:var(--color-muted)]">No {filter === 'all' ? '' : filter} tasks yet.</p>
+          <p className="text-xs">
             {filter === 'all'
               ? 'Tasks are automatically extracted from your memories.'
               : filter === 'active'
-                ? 'All caught up! 🎉'
+                ? 'All caught up.'
                 : 'Great work!'}
           </p>
         </div>
@@ -110,20 +110,20 @@ export default function Tasks() {
         {filteredTasks.map((task) => (
           <div
             key={task.id}
-            className={`p-3 rounded border transition ${
+            className={`rounded-[var(--radius-soft)] border p-4 ${
               task.completed
-                ? 'bg-zinc-900 border-zinc-800 opacity-60'
-                : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'
+                ? 'border-[color:var(--color-border)] bg-white/[0.025] opacity-60'
+                : 'border-[color:var(--color-border)] bg-[color:var(--color-surface)] hover:border-[color:var(--color-border-strong)]'
             }`}
           >
             <div className="flex items-start gap-3">
               {/* Checkbox */}
               <button
                 onClick={() => handleToggleTask(task.id, task.completed)}
-                className={`mt-1 w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition ${
+                className={`mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border ${
                   task.completed
-                    ? 'bg-green-600 border-green-600'
-                    : 'border-zinc-600 hover:border-zinc-500'
+                    ? 'border-emerald-200/30 bg-emerald-300/20'
+                    : 'border-[color:var(--color-border-strong)] hover:border-[color:var(--color-accent)]/50'
                 }`}
               >
                 {task.completed && (
@@ -148,8 +148,8 @@ export default function Tasks() {
                 <p
                   className={`text-sm leading-relaxed break-words ${
                     task.completed
-                      ? 'line-through text-zinc-600'
-                      : 'text-zinc-100'
+                      ? 'line-through text-[color:var(--color-faint)]'
+                      : 'text-[color:var(--color-text)]'
                   }`}
                 >
                   {task.title}
@@ -157,7 +157,7 @@ export default function Tasks() {
 
                 <div className="flex gap-2 items-center mt-2">
                   {task.due_date && (
-                    <div className="text-xs text-zinc-500 px-2 py-1 bg-zinc-800 rounded">
+                    <div className="rounded-full bg-white/[0.035] px-2 py-1 text-xs text-[color:var(--color-muted)]">
                       {(() => {
                         const due = new Date(task.due_date)
                         const today = new Date()
@@ -170,10 +170,10 @@ export default function Tasks() {
                           due.toDateString() === tomorrow.toDateString()
                         const isPast = due < today && !isToday
 
-                        if (isToday) return '📅 Today'
-                        if (isTomorrow) return '📅 Tomorrow'
+                        if (isToday) return 'Today'
+                        if (isTomorrow) return 'Tomorrow'
                         if (isPast && !task.completed)
-                          return `⚠️ ${due.toLocaleDateString('en-US', {
+                          return `Overdue ${due.toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric'
                           })}`
@@ -185,7 +185,7 @@ export default function Tasks() {
                     </div>
                   )}
 
-                  <div className="text-xs text-zinc-600">
+                  <div className="text-xs text-[color:var(--color-faint)]">
                     {new Date(task.created_at).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',

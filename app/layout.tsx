@@ -6,40 +6,44 @@ import { ToastProvider } from '../lib/useToast'
 import ToastContainerWithContext from '../components/ToastContainer'
 
 export const metadata = {
-  title: 'Continuum — Prototype',
+  title: 'Continuum',
   description: 'Frictionless conversational memory'
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-black text-white min-h-screen flex">
+      <body className="min-h-screen overflow-x-hidden">
         <ToastProvider>
-          {/* Sidebar */}
-          <Sidebar />
+          <div className="flex h-screen min-h-screen overflow-hidden">
+            <Sidebar />
 
-          {/* Main Content */}
-          <div className="flex-1 flex flex-col">
-            {/* Header */}
-            <header className="border-b border-zinc-800 p-4">
-              <div className="max-w-6xl mx-auto flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <MobileSidebar />
-                  <h1 className="text-lg font-semibold">Continuum (Prototype)</h1>
+            <div className="flex min-w-0 flex-1 flex-col">
+              <header className="shrink-0 border-b border-[color:var(--color-border)] bg-[rgba(8,8,7,0.68)] px-4 py-4 backdrop-blur-xl md:px-8">
+                <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <MobileSidebar />
+                    <div>
+                      <h1 className="font-display text-2xl font-medium leading-none text-[color:var(--color-text)]">
+                        Continuum
+                      </h1>
+                      <p className="mt-1 hidden text-[11px] uppercase tracking-[0.24em] text-[color:var(--color-faint)] sm:block">
+                        Conversational memory
+                      </p>
+                    </div>
+                  </div>
+                  <AuthButton />
                 </div>
-                <AuthButton />
-              </div>
-            </header>
+              </header>
 
-            {/* Content */}
-            <main className="flex-1 overflow-auto">
-              <div className="max-w-6xl mx-auto p-4">
-                {children}
-              </div>
-            </main>
+              <main className="continuum-scrollbar min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+                <div className="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-12">
+                  {children}
+                </div>
+              </main>
+            </div>
           </div>
 
-          {/* Toast Container */}
           <ToastContainerWithContext />
         </ToastProvider>
       </body>

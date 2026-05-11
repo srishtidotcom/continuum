@@ -42,48 +42,54 @@ export default function Stream() {
   const memoryCount = (Object.values(memories) as Memory[][]).reduce((sum, group) => sum + group.length, 0)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       {memoryCount === 0 && !loading && (
-        <div className="text-center py-8 text-zinc-500">
-          No memories yet. Start capturing your thoughts!
+        <div className="py-14 text-center">
+          <p className="font-display text-3xl font-medium text-[color:var(--color-muted)]">
+            Your stream is still quiet.
+          </p>
+          <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-[color:var(--color-faint)]">
+            Start with whatever is already in your head. Continuum will keep the thread.
+          </p>
         </div>
       )}
 
       {/* Render grouped memories by date */}
       {(Object.entries(memories) as Array<[string, Memory[]]>).map(([date, items]) => (
-        <div key={date}>
+        <div key={date} className="relative">
           {/* Date header */}
-          <div className="sticky top-0 py-2 mb-2 text-xs font-semibold text-zinc-400 uppercase tracking-wide bg-zinc-950/95 backdrop-blur">
+          <div className="sticky top-0 z-10 mb-4 bg-[rgba(8,8,7,0.82)] py-3 text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--color-faint)] backdrop-blur-xl">
             {formatDateHeader(date)}
           </div>
 
           {/* Memory items for this date */}
-          <div className="space-y-3">
+          <div className="space-y-3 border-l border-[color:var(--color-border)] pl-5">
             {items.map((memory: Memory) => (
-              <div key={memory.id} className="p-3 bg-zinc-900 border border-zinc-800 rounded hover:border-zinc-700 transition">
-                <div className="text-xs text-zinc-500">
+              <div key={memory.id} className="group relative rounded-[var(--radius-soft)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-5 shadow-[0_18px_60px_rgba(0,0,0,0.18)] backdrop-blur hover:border-[color:var(--color-border-strong)]">
+                <span className="absolute -left-[27px] top-6 h-3 w-3 rounded-full border border-[color:var(--color-accent)]/40 bg-[color:var(--color-bg)] shadow-[0_0_0_5px_var(--color-bg)]" />
+                <div className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-faint)]">
                   {new Date(memory.created_at).toLocaleTimeString([], {
                     hour: '2-digit',
                     minute: '2-digit'
                   })}
                 </div>
-                <div className="mt-2 text-sm leading-relaxed">{memory.text}</div>
+                <div className="mt-3 text-[15px] leading-7 text-[color:var(--color-text)]">{memory.text}</div>
                 {memory.discovery_hint && (
-                  <div className="mt-3 p-2 bg-zinc-800 border border-zinc-700 rounded text-xs text-zinc-300">
+                  <div className="mt-4 rounded-[var(--radius-soft)] border border-[color:var(--color-border)] bg-white/[0.035] p-3 text-xs text-[color:var(--color-muted)]">
                     <div className="flex items-center justify-between gap-2">
-                      <div className="text-zinc-400">Related thought from {memory.discovery_hint.days_ago} days ago</div>
+                      <div>Related thought from {memory.discovery_hint.days_ago} days ago</div>
                       <a
                         href={`/memories?focus=${memory.discovery_hint.related_memory_id}`}
-                        className="text-xs text-indigo-300 hover:underline"
+                        className="text-xs text-[color:var(--color-accent)] hover:text-[color:var(--color-text)]"
                       >
                         Open related
                       </a>
                     </div>
-                    <div className="mt-1 text-sm leading-tight text-zinc-200">{memory.discovery_hint.snippet}</div>
+                    <div className="mt-2 text-sm leading-6 text-[color:var(--color-text)]">{memory.discovery_hint.snippet}</div>
                   </div>
                 )}
                 {memory.half_baked && (
-                  <div className="mt-2 inline-block px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-xs text-zinc-400">
+                  <div className="mt-4 inline-block rounded-full border border-[color:var(--color-border)] bg-[color:var(--color-accent-soft)] px-3 py-1 text-xs text-[color:var(--color-muted)]">
                     Half-baked
                   </div>
                 )}
@@ -97,9 +103,9 @@ export default function Stream() {
       {loading && (
         <div className="py-4 text-center">
           <div className="inline-flex gap-1">
-            <div className="w-2 h-2 bg-zinc-600 rounded-full animate-bounce"></div>
-            <div className="w-2 h-2 bg-zinc-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-            <div className="w-2 h-2 bg-zinc-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            <div className="h-2 w-2 animate-bounce rounded-full bg-[color:var(--color-faint)]"></div>
+            <div className="h-2 w-2 animate-bounce rounded-full bg-[color:var(--color-faint)]" style={{ animationDelay: '0.1s' }}></div>
+            <div className="h-2 w-2 animate-bounce rounded-full bg-[color:var(--color-faint)]" style={{ animationDelay: '0.2s' }}></div>
           </div>
         </div>
       )}
@@ -112,7 +118,7 @@ export default function Stream() {
         <div className="py-4 text-center">
           <button
             onClick={() => loadMore(20, 'date')}
-            className="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-600 rounded text-sm text-zinc-100 transition"
+            className="rounded-[var(--radius-soft)] border border-[color:var(--color-border)] bg-white/[0.035] px-6 py-2 text-sm text-[color:var(--color-muted)] hover:border-[color:var(--color-border-strong)] hover:text-[color:var(--color-text)]"
           >
             Load More
           </button>
@@ -121,7 +127,7 @@ export default function Stream() {
 
       {/* End of list indicator */}
       {!hasMore && memoryCount > 0 && (
-        <div className="py-4 text-center text-zinc-600 text-sm">
+        <div className="py-4 text-center text-sm text-[color:var(--color-faint)]">
           Showing all {total} memories
         </div>
       )}

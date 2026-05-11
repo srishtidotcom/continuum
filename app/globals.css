@@ -2,10 +2,158 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --font-serif: "Cormorant Garamond", Cormorant, Georgia, "Times New Roman", serif;
+  --font-sans: Nunito, Avenir, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --color-bg: #080807;
+  --color-bg-soft: #0d0d0b;
+  --color-surface: rgba(21, 21, 18, 0.72);
+  --color-surface-strong: rgba(30, 29, 25, 0.82);
+  --color-border: rgba(232, 221, 194, 0.09);
+  --color-border-strong: rgba(232, 221, 194, 0.16);
+  --color-text: #f3eee3;
+  --color-muted: #a9a193;
+  --color-faint: #706a60;
+  --color-accent: #d7c7a4;
+  --color-accent-soft: rgba(215, 199, 164, 0.13);
+  --scrollbar-track: rgba(255, 255, 255, 0.018);
+  --scrollbar-thumb: rgba(215, 199, 164, 0.28);
+  --scrollbar-thumb-hover: rgba(215, 199, 164, 0.46);
+  --space-page: clamp(1.25rem, 2vw, 2.5rem);
+  --radius-soft: 8px;
+}
+
 html {
   color-scheme: dark;
+  background: var(--color-bg);
 }
 
 body {
   margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 50% -10%, rgba(132, 116, 82, 0.16), transparent 36rem),
+    linear-gradient(180deg, #0b0b09 0%, var(--color-bg) 46%, #060605 100%);
+  color: var(--color-text);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(215, 199, 164, 0.24);
+  color: var(--color-text);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/*
+  Scrollbars are part of the interface in Continuum: visible enough to orient,
+  quiet enough to preserve the calm dark surface. The global rules catch body,
+  main, sidebar, chat, future modals, and any component-level overflow area.
+*/
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/*
+  Apply this class to intentional scroll containers so Firefox and WebKit keep
+  the same premium treatment even inside fixed-height panels.
+*/
+.continuum-scrollbar {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  -webkit-overflow-scrolling: touch;
+}
+
+.continuum-scrollbar::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+.continuum-scrollbar::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+.continuum-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+.continuum-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
+
+textarea,
+input,
+button,
+select {
+  font: inherit;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  transition-property: color, background-color, border-color, opacity, box-shadow, transform;
+  transition-duration: 180ms;
+  transition-timing-function: ease;
+}
+
+.font-display {
+  font-family: var(--font-serif), Georgia, serif;
+}
+
+.continuum-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(18px);
+}
+
+.continuum-input {
+  background: linear-gradient(180deg, rgba(24, 24, 21, 0.92), rgba(13, 13, 11, 0.94));
+  border: 1px solid var(--color-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 28px 90px rgba(0, 0, 0, 0.34);
+}
+
+.continuum-input:focus-within {
+  border-color: rgba(215, 199, 164, 0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 0 0 1px rgba(215, 199, 164, 0.08),
+    0 32px 110px rgba(0, 0, 0, 0.42);
 }

@@ -31,21 +31,21 @@ export default function SearchComponent() {
   }, [clearResults])
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Search Form */}
-      <form onSubmit={handleSearch} className="space-y-3">
-        <div className="flex gap-2">
+      <form onSubmit={handleSearch} className="continuum-panel space-y-4 rounded-[var(--radius-soft)] p-4">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search memories... (try 'What am I working on?')"
-            className="flex-1 bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-sm placeholder-zinc-600 focus:outline-none focus:border-zinc-700"
+            className="min-w-0 flex-1 rounded-[var(--radius-soft)] border border-[color:var(--color-border)] bg-white/[0.035] px-3 py-2 text-sm text-[color:var(--color-text)] placeholder:text-[color:var(--color-faint)] focus:border-[color:var(--color-border-strong)] focus:outline-none"
           />
           <button
             type="submit"
             disabled={loading || !query.trim()}
-            className="bg-white text-black px-4 py-2 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-zinc-100 transition"
+            className="rounded-[var(--radius-soft)] bg-[color:var(--color-text)] px-4 py-2 text-sm font-semibold text-[color:var(--color-bg)] hover:bg-[color:var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-40"
           >
             {loading ? 'Searching...' : 'Search'}
           </button>
@@ -53,7 +53,7 @@ export default function SearchComponent() {
             <button
               type="button"
               onClick={handleClear}
-              className="bg-zinc-800 text-zinc-300 px-4 py-2 rounded text-sm hover:bg-zinc-700 transition"
+              className="rounded-[var(--radius-soft)] border border-[color:var(--color-border)] bg-white/[0.035] px-4 py-2 text-sm text-[color:var(--color-muted)] hover:border-[color:var(--color-border-strong)] hover:text-[color:var(--color-text)]"
             >
               Clear
             </button>
@@ -61,12 +61,12 @@ export default function SearchComponent() {
         </div>
 
         {/* Search Options */}
-        <div className="flex gap-4 text-xs">
-          <label className="flex items-center gap-2 text-zinc-400">
+        <div className="flex flex-wrap gap-4 text-xs">
+          <label className="flex items-center gap-2 text-[color:var(--color-muted)]">
             <select
               value={searchType}
               onChange={(e) => setSearchType(e.target.value as SearchType)}
-              className="bg-zinc-900 border border-zinc-800 rounded px-2 py-1 text-zinc-300 focus:outline-none"
+              className="rounded-[var(--radius-soft)] border border-[color:var(--color-border)] bg-[color:var(--color-bg-soft)] px-2 py-1 text-[color:var(--color-text)] focus:outline-none"
             >
               <option value="keyword">Keyword</option>
               <option value="semantic">Semantic</option>
@@ -75,7 +75,7 @@ export default function SearchComponent() {
           </label>
 
           {searchType !== 'keyword' && (
-            <label className="flex items-center gap-2 text-zinc-400">
+            <label className="flex items-center gap-2 text-[color:var(--color-muted)]">
               Threshold:
               <input
                 type="range"
@@ -84,9 +84,9 @@ export default function SearchComponent() {
                 step="0.1"
                 value={threshold}
                 onChange={(e) => setThreshold(parseFloat(e.target.value))}
-                className="w-20"
+                className="w-20 accent-[color:var(--color-accent)]"
               />
-              <span className="text-zinc-500">{threshold.toFixed(1)}</span>
+              <span className="text-[color:var(--color-faint)]">{threshold.toFixed(1)}</span>
             </label>
           )}
         </div>
@@ -94,7 +94,7 @@ export default function SearchComponent() {
 
       {/* Error State */}
       {error && (
-        <div className="p-3 bg-red-900 border border-red-700 rounded text-sm text-red-100">
+        <div className="rounded-[var(--radius-soft)] border border-red-300/20 bg-red-500/10 p-3 text-sm text-red-100">
           Error: {error}
         </div>
       )}
@@ -103,37 +103,37 @@ export default function SearchComponent() {
       {viewMode === 'search' && (
         <div className="space-y-3">
           {loading && (
-            <div className="py-4 text-center text-zinc-500 text-sm">
+            <div className="py-4 text-center text-sm text-[color:var(--color-faint)]">
               Searching {searchType} index...
             </div>
           )}
 
           {!loading && results.length === 0 && (
-            <div className="py-4 text-center text-zinc-600 text-sm">
+            <div className="py-8 text-center text-sm text-[color:var(--color-faint)]">
               No results found for "{query}"
             </div>
           )}
 
           {results.map((result: SearchResult) => (
-            <div key={result.id} className="p-3 bg-zinc-900 border border-zinc-800 rounded hover:border-zinc-700 transition">
+            <div key={result.id} className="rounded-[var(--radius-soft)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-5 hover:border-[color:var(--color-border-strong)]">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
-                  <div className="text-xs text-zinc-500">
+                  <div className="text-xs uppercase tracking-[0.18em] text-[color:var(--color-faint)]">
                     {new Date(result.created_at).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
                       year: 'numeric'
                     })}
                   </div>
-                  <div className="mt-2 text-sm leading-relaxed">{result.text}</div>
+                  <div className="mt-3 text-sm leading-7 text-[color:var(--color-text)]">{result.text}</div>
                 </div>
 
                 {/* Similarity Badge */}
                 {result.similarity !== undefined && (
                   <div className="flex-shrink-0 text-right">
-                    <div className="text-xs text-zinc-500 mb-1">Relevance</div>
-                    <div className="flex items-center justify-center w-12 h-12 bg-zinc-800 rounded">
-                      <span className="text-sm font-semibold text-zinc-300">
+                    <div className="mb-1 text-xs text-[color:var(--color-faint)]">Relevance</div>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-soft)] bg-white/[0.035]">
+                      <span className="text-sm font-semibold text-[color:var(--color-muted)]">
                         {Math.round(result.similarity * 100)}%
                       </span>
                     </div>
@@ -142,7 +142,7 @@ export default function SearchComponent() {
               </div>
 
               {result.half_baked && (
-                <div className="mt-2 inline-block px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-xs text-zinc-400">
+                <div className="mt-4 inline-block rounded-full border border-[color:var(--color-border)] bg-[color:var(--color-accent-soft)] px-3 py-1 text-xs text-[color:var(--color-muted)]">
                   Half-baked
                 </div>
               )}
@@ -150,7 +150,7 @@ export default function SearchComponent() {
           ))}
 
           {!loading && results.length > 0 && (
-            <div className="py-2 text-center text-zinc-600 text-xs">
+            <div className="py-2 text-center text-xs text-[color:var(--color-faint)]">
               Found {results.length} result{results.length === 1 ? '' : 's'}
             </div>
           )}

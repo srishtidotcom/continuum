@@ -32,29 +32,29 @@ export default function Settings() {
       <div className="space-y-6">
         {/* General Settings */}
         <div>
-          <h2 className="text-lg font-semibold mb-4">Settings</h2>
+          <h2 className="font-display mb-4 text-3xl font-medium text-[color:var(--color-text)]">Settings</h2>
           
           {/* Voice Input */}
-          <div className="space-y-4 p-4 bg-zinc-900 border border-zinc-800 rounded">
+          <div className="continuum-panel space-y-5 rounded-[var(--radius-soft)] p-5">
             <div>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={voiceEnabled}
                   onChange={(e) => setVoiceEnabled(e.target.checked)}
-                  className="w-4 h-4"
+                  className="h-4 w-4 accent-[color:var(--color-accent)]"
                 />
                 <div>
-                  <div className="font-medium text-sm">Enable Voice Input</div>
-                  <div className="text-xs text-zinc-500">Use Whisper to transcribe voice to text</div>
+                  <div className="text-sm font-medium text-[color:var(--color-text)]">Enable Voice Input</div>
+                  <div className="text-xs text-[color:var(--color-faint)]">Use Whisper to transcribe voice to text</div>
                 </div>
               </label>
             </div>
 
             {/* Auto-save Interval */}
-            <div className="border-t border-zinc-800 pt-4">
-              <label className="block text-sm font-medium mb-2">
-                Auto-save Interval (seconds)
+            <div className="border-t border-[color:var(--color-border)] pt-5">
+              <label className="mb-2 block text-sm font-medium text-[color:var(--color-text)]">
+                Legacy Auto-save Interval
               </label>
               <div className="flex items-center gap-4">
                 <input
@@ -64,27 +64,27 @@ export default function Settings() {
                   step="10"
                   value={autoSaveInterval}
                   onChange={(e) => setAutoSaveInterval(Number(e.target.value))}
-                  className="flex-1"
+                  className="flex-1 accent-[color:var(--color-accent)]"
                 />
-                <span className="text-sm text-zinc-400 w-12">{autoSaveInterval}s</span>
+                <span className="w-12 text-sm text-[color:var(--color-muted)]">{autoSaveInterval}s</span>
               </div>
-              <div className="text-xs text-zinc-500 mt-2">
-                How frequently to automatically save your thoughts
+              <div className="mt-2 text-xs leading-5 text-[color:var(--color-faint)]">
+                New thoughts now save immediately when the input loses focus or voice recording stops.
               </div>
             </div>
 
             {/* Theme */}
-            <div className="border-t border-zinc-800 pt-4">
-              <label className="block text-sm font-medium mb-2">Theme</label>
+            <div className="border-t border-[color:var(--color-border)] pt-5">
+              <label className="mb-2 block text-sm font-medium text-[color:var(--color-text)]">Theme</label>
               <div className="flex gap-2">
-                {(['dark', 'light'] as const).map((t) => (
+                {(['dark'] as const).map((t) => (
                   <button
                     key={t}
                     onClick={() => setTheme(t)}
-                    className={`px-3 py-1 rounded text-sm transition ${
+                    className={`rounded-[var(--radius-soft)] px-3 py-1 text-sm ${
                       theme === t
-                        ? 'bg-white text-black'
-                        : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                        ? 'bg-[color:var(--color-text)] text-[color:var(--color-bg)]'
+                        : 'border border-[color:var(--color-border)] bg-white/[0.035] text-[color:var(--color-muted)] hover:text-[color:var(--color-text)]'
                     }`}
                   >
                     {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -96,13 +96,13 @@ export default function Settings() {
         </div>
 
         {/* About */}
-        <div className="p-4 bg-zinc-900 border border-zinc-800 rounded">
-          <h3 className="text-sm font-medium mb-2">About</h3>
-          <div className="text-xs text-zinc-400 space-y-1">
+        <div className="continuum-panel rounded-[var(--radius-soft)] p-5">
+          <h3 className="mb-2 text-sm font-medium text-[color:var(--color-text)]">About</h3>
+          <div className="space-y-1 text-xs text-[color:var(--color-muted)]">
             <p>Continuum — Frictionless Conversational Memory</p>
             <p>Version 0.1.0 (Prototype)</p>
             <p className="pt-2">
-              <a href="https://github.com" className="text-blue-400 hover:underline">
+              <a href="https://github.com" className="text-[color:var(--color-accent)] hover:text-[color:var(--color-text)]">
                 View on GitHub
               </a>
             </p>
