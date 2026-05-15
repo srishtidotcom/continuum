@@ -205,7 +205,7 @@ CREATE POLICY IF NOT EXISTS "Users can delete own tasks"
   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-  OPENAI_API_KEY=sk-...
+  GOOGLE_API_KEY=...
   LOCAL_USER_ID=550e8400-e29b-41d4-a716-446655440000  # for local testing
   ```
 
@@ -223,7 +223,7 @@ CREATE POLICY IF NOT EXISTS "Users can delete own tasks"
 
 ### "Failed to retrieve memories" error
 1. Verify RPC function exists: Run test query in SQL Editor
-2. Check OpenAI API key is set
+2. Check Gemini API key is set
 3. Check database has memories with embeddings
 
 ### "Unauthorized" errors
@@ -234,12 +234,12 @@ CREATE POLICY IF NOT EXISTS "Users can delete own tasks"
 ### Semantic search returns no results
 1. Check pgvector extension is installed: `CREATE EXTENSION IF NOT EXISTS vector`
 2. Check IVFFlat index was created (in `db/schema.sql`)
-3. Verify OpenAI embedding API is working
+3. Verify Gemini embedding API is working
 4. Test with lower similarity threshold (e.g., 0.3 instead of 0.5)
 
 ### Chat endpoint fails
 1. Verify RPC function `search_memories_by_embedding` exists
-2. Verify OpenAI API key is valid
+2. Verify Gemini API key is valid
 3. Check server logs for detailed error messages
 
 ---
@@ -268,7 +268,7 @@ REINDEX INDEX idx_memory_embeddings_vector_cosine;
 ### Query Performance Targets
 - **Memory fetch**: <100ms (paginated, indexed)
 - **Keyword search**: <200ms (ILIKE with pagination)
-- **Semantic search**: <500ms (OpenAI API + IVFFlat index)
+- **Semantic search**: <500ms (Gemini API + IVFFlat index)
 - **Chat**: <2s (embedding + search + LLM)
 
 ---
@@ -295,7 +295,7 @@ ALTER TABLE memories DROP COLUMN IF EXISTS importance_score;
 - [ ] RLS policies created for all tables
 - [ ] Service role key stored securely (never in frontend)
 - [ ] Anon key has minimal permissions
-- [ ] OpenAI API key stored as secret (never in frontend)
+- [ ] Gemini API key stored as secret (never in frontend)
 - [ ] JWT tokens properly validated on server
 - [ ] User ID extraction from JWT verified
 

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { serverSupabase } from '../../../lib/serverSupabase'
-import { generateEmbedding } from '../../../lib/openaiUtils'
-import { getOpenAIApiKey } from '../../../lib/envValidation'
+import { generateEmbedding } from '../../../lib/geminiUtils'
+import { getGeminiApiKey } from '../../../lib/envValidation'
 import { logger } from '../../../lib/logger'
 import { extractUserId } from '../../../lib/authUtils'
 import {
@@ -153,7 +153,7 @@ async function keywordSearch(userId: string, query: string, limit: number): Prom
  * Semantic search: use pgvector cosine similarity
  * 
  * Steps:
- * 1. Generate embedding for the query via OpenAI
+ * 1. Generate embedding for the query via Gemini
  * 2. Query memory_embeddings table using cosine similarity (<-> operator)
  * 3. Join with memories and return results
  */
@@ -165,23 +165,24 @@ async function semanticSearch(
 ): Promise<any[]> {
   try {
     // Step 1: Generate query embedding
-    const openaiKey = getOpenAIApiKey()
-    if (!openaiKey) {
-      logger.warn('Semantic search skipped: OpenAI key not configured')
+    const geminiKey = getGeminiApiKey()
+    if (!geminiKey) {
+      logger.warn('Semantic search skipped: Gemini key not configured')
       return []
     }
 
     const { embedding: queryEmbedding, error: embError } = await generateEmbedding(
       query,
-      openaiKey
+      geminiKey,
+      'RETRIEVAL_QUERY'
     )
 
     if (embError || !queryEmbedding) {
-      logger.logExternalApi('OpenAI', 'embeddings', false, embError)
+      logger.logExternalApi('Gemini', 'embeddings', false, embError)
       return []
     }
 
-    logger.logExternalApi('OpenAI', 'embeddings', true)
+    logger.logExternalApi('Gemini', 'embeddings', true)
 
     // Step 2: Query using RPC for pgvector similarity search
     const { data, error } = await serverSupabase.rpc(RPC_FUNCTIONS.SEARCH_MEMORIES, {

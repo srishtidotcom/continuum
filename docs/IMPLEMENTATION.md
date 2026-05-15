@@ -7,7 +7,7 @@ This guide covers the Memory Stream Retrieval and Search functionality built for
 Two main features have been implemented:
 
 1. **Memory Stream Retrieval** — Chronological feed of memories with automatic date grouping
-2. **Search** — Keyword + semantic + hybrid search using pgvector and OpenAI embeddings
+2. **Search** — Keyword + semantic + hybrid search using pgvector and Gemini embeddings
 
 ## Architecture
 
@@ -99,8 +99,8 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
-# OpenAI (for embeddings & semantic search)
-OPENAI_API_KEY=sk-your-api-key
+# Google (for embeddings & semantic search)
+GOOGLE_API_KEY=your-api-key
 
 # Local development (optional)
 LOCAL_USER_ID=550e8400-e29b-41d4-a716-446655440000
@@ -249,14 +249,14 @@ curl -X POST http://localhost:3000/api/search \
 - **What:** Case-insensitive text matching (PostgreSQL ILIKE)
 - **Speed:** Fast (full-text indexed)
 - **Best for:** Exact phrase matching, brand/name lookups
-- **Example:** "Find memories about 'OpenAI'"
+- **Example:** "Find memories about 'Gemini'"
 
 ### Semantic Search
 - **What:** Cosine similarity in embedding space
 - **Speed:** Moderate (IVFFlat index on vectors)
 - **Best for:** Meaning-based queries, conceptual search
 - **Example:** "What have I been thinking about AI?" → finds related concepts
-- **Cost:** OpenAI API call per query
+- **Cost:** Gemini API call per query
 
 ### Hybrid Search
 - **What:** Combines keyword + semantic results, deduplicated
@@ -274,7 +274,7 @@ The IVFFlat index on `memory_embeddings.embedding` makes semantic search efficie
 
 ### Cost Optimization
 - **Embeddings**: Called only on input capture and search queries
-- **API calls per search**: 1 OpenAI call (text-embedding-3-small) per semantic/hybrid search
+- **API calls per search**: 1 Gemini call (embedding-001) per semantic/hybrid search
 - **Database queries**: 1-2 queries per API call
 
 ### Scaling
@@ -363,7 +363,7 @@ Semantic/hybrid search already returns results sorted by similarity score (highe
 - For local dev, use `x-user-id: <uuid>` header or `LOCAL_USER_ID` env var
 
 ### Semantic search returns empty
-- Verify `OPENAI_API_KEY` is set
+- Verify `GOOGLE_API_KEY` is set
 - Check Supabase function `search_memories_by_embedding` exists (run schema.sql)
 - Ensure `memory_embeddings` table has records for memories
 
@@ -372,7 +372,7 @@ Semantic/hybrid search already returns results sorted by similarity score (highe
 - Monitor pgvector query plan: `EXPLAIN ANALYZE SELECT ... FROM memory_embeddings`
 
 ### High API costs
-- Semantic search incurs 1 OpenAI call (~$0.00002) per search
+- Semantic search incurs 1 Gemini call (~$0.00001) per search
 - Consider caching common queries
 - Use keyword search for frequent queries
 

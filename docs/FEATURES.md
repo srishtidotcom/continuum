@@ -23,9 +23,9 @@ The system retrieves relevant memories using semantic search (embeddings) and in
 ### How It Works
 
 1. **User inputs a question** in the chat interface
-2. **System generates embedding** for the user's message using OpenAI's `text-embedding-3-small`
+2. **System generates embedding** for the user's message using Gemini's `embedding-001`
 3. **Semantic search** retrieves up to 10 most relevant memories (using pgvector cosine similarity, threshold: 0.3)
-4. **LLM processes context** — GPT-4o-mini generates a response using:
+4. **LLM processes context** — Gemini generates a response using:
    - System prompt explaining the Continuum assistant role
    - Retrieved memories as context (formatted with dates)
    - User's natural language question
@@ -79,7 +79,7 @@ Click the **Reflect** tab in the main navigation to access the chat interface.
 
 ### Configuration
 
-- **Model:** `gpt-4o-mini` (cost-efficient, fast)
+- **Model:** Gemini (cost-efficient, fast)
 - **Temperature:** 0.7 (balanced creativity/consistency)
 - **Max tokens:** 500 per response
 - **Memory threshold:** 0.3 (lower = more context, higher = more relevance)
@@ -87,7 +87,7 @@ Click the **Reflect** tab in the main navigation to access the chat interface.
 
 ### Environment Requirements
 
-- `OPENAI_API_KEY` — Must be set for embeddings and LLM generation
+- `GOOGLE_API_KEY` — Must be set for embeddings and LLM generation
 
 ---
 
@@ -111,7 +111,7 @@ When you save a memory, the system:
    - Only proceeds to LLM if keywords detected (cost optimization)
 
 2. **Calls task extraction LLM** (if keywords found)
-   - Sends memory text to GPT-4o-mini
+   - Sends memory text to Gemini
    - Prompt guides the model to extract:
      - **Title:** Concise task description (≤100 chars)
      - **Due date:** If mentioned (YYYY-MM-DD or null)
@@ -205,7 +205,7 @@ Click the **Tasks** tab in the main navigation.
 
 ### Configuration
 
-- **Extraction model:** `gpt-4o-mini`
+- **Extraction model:** Gemini
 - **Temperature:** 0.3 (precise, literal extraction)
 - **Max tokens:** 300
 - **Keyword detection:** Local, instant
@@ -289,11 +289,11 @@ CREATE TABLE tasks (
 ### Chat returns no results
 - Ensure you have memories in the system
 - Try a different query phrasing
-- Check OpenAI API key is set and valid
+- Check Gemini API key is set and valid
 
 ### Tasks not extracting
 - Ensure memory text contains task keywords
-- Check OpenAI API key
+- Check Gemini API key
 - Verify database task table exists
 
 ### Performance issues

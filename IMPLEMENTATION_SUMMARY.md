@@ -22,7 +22,7 @@ Built two critical features for Continuum MVP as specified:
   - **Hybrid search**: Combined results with deduplication
   - Configurable similarity threshold (0.5 default)
   - Relevance scoring for semantic results
-  - OpenAI embedding integration
+  - Gemini embedding integration
 
 ---
 
@@ -157,8 +157,8 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
-# OpenAI (for embeddings)
-OPENAI_API_KEY=sk-...
+# Google (for embeddings and LLM)
+GOOGLE_API_KEY=...
 
 # Local dev (optional)
 LOCAL_USER_ID=550e8400-e29b-41d4-a716-446655440000
@@ -178,7 +178,7 @@ Run the contents of `db/schema.sql` in Supabase SQL Editor:
 - [ ] Set environment variables in `.env.local`
 - [ ] Import components in your layout (Stream, Search, Input)
 - [ ] Test endpoints using examples in `/TESTING.md`
-- [ ] Verify OpenAI embeddings work (check API key)
+- [ ] Verify Gemini embeddings work (check API key)
 - [ ] Load initial memories via `/api/input`
 - [ ] Test search with "semantic" type
 
@@ -188,7 +188,7 @@ Run the contents of `db/schema.sql` in Supabase SQL Editor:
 
 - **Memory fetch**: <100ms (paginated, indexed)
 - **Keyword search**: <200ms (ILIKE with pagination)
-- **Semantic search**: <500ms (OpenAI API + IVFFlat index)
+- **Semantic search**: <500ms (Gemini API + IVFFlat index)
 - **Hybrid search**: <600ms (both indexes queried, deduplicated)
 
 ### Scaling
@@ -258,7 +258,7 @@ More examples in `/TESTING.md`
 - Error handling and validation
 - User isolation via JWT/x-user-id
 - Pagination with metadata
-- Graceful OpenAI API fallbacks
+- Graceful Gemini API fallbacks
 
 ✨ **Performant**
 - IVFFlat index for sub-100ms vector search
@@ -284,7 +284,7 @@ More examples in `/TESTING.md`
 
 as of 11 may 2025
 
-After fixing the OpenAI quota issue, your deployment checklist is mostly:
+After verifying the Gemini configuration, your deployment checklist is mostly:
 
 verify semantic search works
 verify chat retrieval works
@@ -335,13 +335,13 @@ Especially for:
 /api/search
 /api/input
 
-Otherwise someone can burn your OpenAI quota instantly.
+Otherwise someone can quickly exceed your Gemini rate limits.
 
 3. Add retry/fallback handling
 
 For:
 
-OpenAI failures
+Gemini failures
 embedding failures
 RPC failures
 

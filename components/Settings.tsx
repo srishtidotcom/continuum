@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 
 export default function Settings() {
-  const [voiceEnabled, setVoiceEnabled] = useState(false)
   const [autoSaveInterval, setAutoSaveInterval] = useState(30) // seconds
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
 
@@ -12,20 +11,19 @@ export default function Settings() {
     const saved = localStorage.getItem('continuum-settings')
     if (saved) {
       const settings = JSON.parse(saved)
-      setVoiceEnabled(settings.voiceEnabled || false)
       setAutoSaveInterval(settings.autoSaveInterval || 30)
       setTheme(settings.theme || 'dark')
     }
   }, [])
 
   const saveSettings = () => {
-    const settings = { voiceEnabled, autoSaveInterval, theme }
+    const settings = { autoSaveInterval, theme }
     localStorage.setItem('continuum-settings', JSON.stringify(settings))
   }
 
   useEffect(() => {
     saveSettings()
-  }, [voiceEnabled, autoSaveInterval, theme])
+  }, [autoSaveInterval, theme])
 
   return (
     <div className="max-w-2xl">
@@ -34,25 +32,9 @@ export default function Settings() {
         <div>
           <h2 className="font-display mb-4 text-3xl font-medium text-[color:var(--color-text)]">Settings</h2>
           
-          {/* Voice Input */}
           <div className="continuum-panel space-y-5 rounded-[var(--radius-soft)] p-5">
-            <div>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={voiceEnabled}
-                  onChange={(e) => setVoiceEnabled(e.target.checked)}
-                  className="h-4 w-4 accent-[color:var(--color-accent)]"
-                />
-                <div>
-                  <div className="text-sm font-medium text-[color:var(--color-text)]">Enable Voice Input</div>
-                  <div className="text-xs text-[color:var(--color-faint)]">Use Whisper to transcribe voice to text</div>
-                </div>
-              </label>
-            </div>
-
             {/* Auto-save Interval */}
-            <div className="border-t border-[color:var(--color-border)] pt-5">
+            <div>
               <label className="mb-2 block text-sm font-medium text-[color:var(--color-text)]">
                 Legacy Auto-save Interval
               </label>
@@ -69,7 +51,7 @@ export default function Settings() {
                 <span className="w-12 text-sm text-[color:var(--color-muted)]">{autoSaveInterval}s</span>
               </div>
               <div className="mt-2 text-xs leading-5 text-[color:var(--color-faint)]">
-                New thoughts now save immediately when the input loses focus or voice recording stops.
+                New thoughts now save immediately when the input loses focus.
               </div>
             </div>
 

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { serverSupabase } from '../../../lib/serverSupabase'
-import { generateEmbedding, generateChatResponse } from '../../../lib/openaiUtils'
-import { getOpenAIApiKey, hasOpenAISupport } from '../../../lib/envValidation'
+import { generateEmbedding, generateChatResponse, streamChatResponse } from '../../../lib/geminiUtils'
+import { getGeminiApiKey } from '../../../lib/envValidation'
 import { logger } from '../../../lib/logger'
 import { extractUserId } from '../../../lib/authUtils'
 import {
@@ -13,7 +13,7 @@ import {
   PAGINATION,
   CHAT_CONFIG
 } from '../../../lib/constants'
-import { ChatRequest, ChatResponse, ChatStreamEvent, validateChatResponse } from '../../../lib/chatTypes'
+import { ChatRequest } from '../../../lib/chatTypes'
 
 /**
  * POST /api/chat
@@ -66,14 +66,14 @@ export async function POST(request: Request) {
 
     logger.logApiStart('POST', API_ROUTES.CHAT, userId)
 
-    // Step 1: Verify OpenAI is available
-    const openaiKey = getOpenAIApiKey()
-    if (!openaiKey) {
-      logger.error('POST /api/chat: OpenAI API key not configured', {
+    // Step 1: Verify Gemini is available
+    const geminiKey = getGeminiApiKey()
+    if (!geminiKey) {
+      logger.error('POST /api/chat: Gemini API key not configured', {
         userId
       })
       return NextResponse.json(
-        { ok: false, error: ERROR_MESSAGES.OPENAI_NOT_CONFIGURED },
+        { ok: false, error: ERROR_MESSAGES.GEMINI_NOT_CONFIGURED },
         { status: HTTP_STATUS.INTERNAL_ERROR }
       )
     }
@@ -81,18 +81,19 @@ export async function POST(request: Request) {
     // Step 2: Generate embedding for the user's message
     const { embedding: messageEmbedding, error: embError } = await generateEmbedding(
       message,
-      openaiKey
+      geminiKey,
+      'RETRIEVAL_QUERY'
     )
 
     if (embError || !messageEmbedding) {
-      logger.logExternalApi('OpenAI', 'embeddings', false, embError)
+      logger.logExternalApi('Gemini', 'embeddings', false, embError)
       return NextResponse.json(
         { ok: false, error: ERROR_MESSAGES.EMBEDDING_FAILED },
         { status: HTTP_STATUS.INTERNAL_ERROR }
       )
     }
 
-    logger.logExternalApi('OpenAI', 'embeddings', true)
+    logger.logExternalApi('Gemini', 'embeddings', true)
 
     // Step 3: Retrieve relevant memories using semantic search (threshold: 0.3 for more context)
     const { data: relevantMemories, error: searchErr } = await serverSupabase.rpc(
@@ -120,7 +121,7 @@ export async function POST(request: Request) {
       .map((mem: any) => `[${mem.created_at.split('T')[0]}] ${mem.text}`)
       .join('\n\n')
 
-    // Step 5: Call LLM (GPT-4o-mini for cost efficiency) with context
+    // Step 5: Call Gemini with context
     const systemPrompt = `You are Continuum, a conversational memory assistant. You help users reflect on their thoughts, ideas, and memories.
 
 When answering questions, reference specific memories and timestamps when relevant. Be conversational, insightful, and help the user discover patterns, connections, and insights from their memory history.
@@ -131,25 +132,7 @@ ${memoryContext || 'No relevant memories found.'}
 
 Answer the user's question thoughtfully, drawing from these memories while being direct and concise.`
 
-    const { response, error: chatError } = await generateChatResponse(
-      systemPrompt,
-      message,
-      openaiKey,
-      CHAT_CONFIG.TEMPERATURE,
-      CHAT_CONFIG.MAX_TOKENS
-    )
-
-    if (chatError || !response) {
-      logger.logExternalApi('OpenAI', 'chat.completions', false, chatError)
-      return NextResponse.json(
-        { ok: false, error: ERROR_MESSAGES.CHAT_GENERATION_FAILED },
-        { status: HTTP_STATUS.INTERNAL_ERROR }
-      )
-    }
-
-    logger.logExternalApi('OpenAI', 'chat.completions', true)
-
-    // Step 5: Check query parameter for streaming mode
+    // Step 6: Check query parameter for streaming mode
     const url = new URL(request.url)
     const stream = url.searchParams.get('stream') === 'true'
 
@@ -173,34 +156,16 @@ Answer the user's question thoughtfully, drawing from these memories while being
             }
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(metadataEvent)}\n\n`))
 
-            // Send the LLM response in chunks using OpenAI stream
-            const streamRes = await fetch('https://api.openai.com/v1/chat/completions', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${openaiKey}`
-              },
-              body: JSON.stringify({
-                model: 'gpt-4o-mini',
-                messages: [
-                  {
-                    role: 'system',
-                    content: systemPrompt
-                  },
-                  {
-                    role: 'user',
-                    content: message
-                  }
-                ],
-                temperature: 0.7,
-                max_tokens: 500,
-                stream: true
-              })
-            })
+            const { response: streamRes, error: streamError } = await streamChatResponse(
+              systemPrompt,
+              message,
+              geminiKey,
+              CHAT_CONFIG.TEMPERATURE,
+              CHAT_CONFIG.MAX_TOKENS
+            )
 
-            if (!streamRes.ok) {
-              const errorText = await streamRes.text()
-              console.error('OpenAI stream error:', errorText)
+            if (streamError || !streamRes) {
+              logger.logExternalApi('Gemini', 'streamGenerateContent', false, streamError)
               const errorEvent = {
                 type: 'error',
                 message: 'Failed to stream response'
@@ -209,6 +174,8 @@ Answer the user's question thoughtfully, drawing from these memories while being
               controller.close()
               return
             }
+
+            logger.logExternalApi('Gemini', 'streamGenerateContent', true)
 
             const reader = streamRes.body?.getReader()
             if (!reader) {
@@ -239,7 +206,9 @@ Answer the user's question thoughtfully, drawing from these memories while being
 
                   try {
                     const json = JSON.parse(data)
-                    const chunk = json.choices?.[0]?.delta?.content
+                    const chunk = json.candidates?.[0]?.content?.parts
+                      ?.map((part: { text?: string }) => part.text || '')
+                      .join('')
 
                     if (chunk) {
                       const streamEvent = {
@@ -277,6 +246,24 @@ Answer the user's question thoughtfully, drawing from these memories while being
         }
       })
     }
+
+    const { response, error: chatError } = await generateChatResponse(
+      systemPrompt,
+      message,
+      geminiKey,
+      CHAT_CONFIG.TEMPERATURE,
+      CHAT_CONFIG.MAX_TOKENS
+    )
+
+    if (chatError || !response) {
+      logger.logExternalApi('Gemini', 'generateContent', false, chatError)
+      return NextResponse.json(
+        { ok: false, error: ERROR_MESSAGES.CHAT_GENERATION_FAILED },
+        { status: HTTP_STATUS.INTERNAL_ERROR }
+      )
+    }
+
+    logger.logExternalApi('Gemini', 'generateContent', true)
 
     // Non-streaming mode: Return response as JSON (legacy)
     logger.logApiSuccess('POST', API_ROUTES.CHAT, HTTP_STATUS.OK)

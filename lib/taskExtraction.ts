@@ -1,7 +1,9 @@
 /**
  * NLP-based task extraction utility
- * Uses OpenAI GPT to intelligently extract actionable tasks from memory text
+ * Uses Gemini to intelligently extract actionable tasks from memory text
  */
+
+import { GEMINI_MODELS, TASK_CONFIG } from './constants'
 
 export interface ExtractedTask {
   title: string
@@ -10,34 +12,31 @@ export interface ExtractedTask {
 }
 
 /**
- * Extract tasks from memory text using LLM
- * 
- * Sends the memory text to GPT-4o-mini which intelligently identifies
+ * Extract tasks from memory text using Gemini.
+ *
+ * Sends the memory text to Gemini, which intelligently identifies
  * actionable items, deadlines, and tasks mentioned in the text.
- * 
+ *
  * Returns an array of extracted tasks or empty array if no tasks found.
  */
 export async function extractTasksFromMemory(
   text: string,
-  openaiKey: string
+  geminiKey: string
 ): Promise<ExtractedTask[]> {
   if (!text || !text.trim()) return []
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODELS.CHAT}:generateContent`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${openaiKey}`
+        'x-goog-api-key': geminiKey
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        temperature: 0.3,
-        max_tokens: 300,
-        messages: [
-          {
-            role: 'system',
-            content: `You are a task extraction assistant. Extract actionable tasks from the given memory text.
+        systemInstruction: {
+          parts: [
+            {
+              text: `You are a task extraction assistant. Extract actionable tasks from the given memory text.
 
 For each task found, return a JSON array with objects in this format:
 {
@@ -62,12 +61,20 @@ Examples to skip:
 - "I finished the report" (already done)
 - "I was thinking about redesigning the UI" (too vague, not actionable)
 - "The weather is nice" (not a task)`
-          },
+            }
+          ]
+        },
+        contents: [
           {
             role: 'user',
-            content: `Extract tasks from this memory:\n\n${text}`
+            parts: [{ text: `Extract tasks from this memory:\n\n${text}` }]
           }
-        ]
+        ],
+        generationConfig: {
+          temperature: TASK_CONFIG.TEMPERATURE,
+          maxOutputTokens: TASK_CONFIG.MAX_TOKENS,
+          responseMimeType: 'application/json'
+        }
       })
     })
 
@@ -78,7 +85,9 @@ Examples to skip:
     }
 
     const data = await response.json()
-    let content = data?.choices?.[0]?.message?.content || ''
+    let content = data?.candidates?.[0]?.content?.parts
+      ?.map((part: { text?: string }) => part.text || '')
+      .join('') || ''
 
     // Parse JSON from response (might be wrapped in markdown code blocks)
     content = content.trim()
@@ -144,7 +153,18 @@ export function detectTaskKeywords(text: string): boolean {
     'deadline',
     'due',
     'remind',
-    'remember to'
+    'remember to',
+    // common imperative/conversational verbs people use for errands or tasks
+    'go to',
+    'buy',
+    'purchase',
+    'pick up',
+    'pickup',
+    'get',
+    'order',
+    'visit',
+    'stop by',
+    'pay'
   ]
 
   const lower = text.toLowerCase()

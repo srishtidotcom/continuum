@@ -34,12 +34,11 @@ This document outlines all the improvements made to address critical weaknesses 
 
 ### 1. Eliminated Code Duplication
 **Files Created:**
-- `lib/openaiUtils.ts` - Shared OpenAI API utilities
+- `lib/geminiUtils.ts` - Shared Gemini API utilities
 
 **Functions:**
 - `generateEmbedding()` - Used by `/api/input`, `/api/search`, `/api/chat`
 - `generateChatResponse()` - Used by `/api/chat`
-- `transcribeAudio()` - Used by `/api/transcribe`
 
 **Impact:**
 - ✅ Single source of truth for API calls
@@ -50,17 +49,17 @@ This document outlines all the improvements made to address critical weaknesses 
 **Before:** Each route had duplicate embedding logic
 ```typescript
 // In /api/input, /api/search, /api/chat:
-const embRes = await fetch('https://api.openai.com/v1/embeddings', {
+const embRes = await fetch('https://generativelanguage.googleapis.com/v1beta/models/embedding-001:embedContent', {
   method: 'POST',
   headers: { /* ... */ },
-  body: JSON.stringify({ model: 'text-embedding-3-small', input: text })
+  body: JSON.stringify({ model: 'models/embedding-001', content: { parts: [{ text }] } })
 })
 // Duplicate error handling...
 ```
 
 **After:** Centralized and reusable
 ```typescript
-const { embedding, error } = await generateEmbedding(text, openaiKey)
+const { embedding, error } = await generateEmbedding(text, geminiKey)
 ```
 
 ---
@@ -72,26 +71,26 @@ const { embedding, error } = await generateEmbedding(text, openaiKey)
 **Functions:**
 - `validateEnvironment()` - Check all required/recommended vars
 - `assertEnvironment()` - Throw error if missing required vars
-- `getOpenAIApiKey()` - Safe accessor with null handling
+- `getGeminiApiKey()` - Safe accessor with null handling
 - `getLocalUserId()` - Safe accessor for testing
-- `hasOpenAISupport()` - Feature flag for OpenAI features
+- `hasGeminiSupport()` - Feature flag for Gemini features
 
 **Impact:**
 - ✅ Fails fast with clear error messages on startup
 - ✅ Centralized config management
-- ✅ Graceful degradation when OpenAI not configured
+- ✅ Graceful degradation when Gemini not configured
 - ✅ Type-safe environment access
 
 **Before:** Silent failures and undefined behavior
 ```typescript
-const openaiKey = process.env.OPENAI_API_KEY  // May be undefined
+const geminiKey = process.env.GOOGLE_API_KEY  // May be undefined
 // Later: fetch fails with cryptic error
 ```
 
 **After:** Explicit validation
 ```typescript
-const openaiKey = getOpenAIApiKey()  // null | string
-if (!openaiKey) {
+const geminiKey = getGeminiApiKey()  // null | string
+if (!geminiKey) {
   // Handle gracefully or fail fast
 }
 ```
@@ -136,10 +135,10 @@ if (error) {
 - ✅ `/api/input` - Memory creation with embedding
 - ✅ `/api/chat` - Chat with semantic search
 - ✅ `/api/search` - Keyword and semantic search
-- ✅ `/api/transcribe` - Audio transcription
+
 
 **Changes in Each Route:**
-1. Import new utilities (`openaiUtils`, `envValidation`, `logger`)
+1. Import new utilities (`geminiUtils`, `envValidation`, `logger`)
 2. Replace inline API calls with utility functions
 3. Replace `process.env` access with safe accessors
 4. Replace `console.error()` with structured logging
@@ -210,7 +209,7 @@ curl -X POST http://localhost:3000/api/chat \
 
 ### 🟡 HIGH PRIORITY (Before Production)
 1. [ ] Add request/response logging to all endpoints
-2. [ ] Add rate limiting for OpenAI API calls
+1. [ ] Add rate limiting for Gemini API calls
 3. [ ] Implement retry logic with exponential backoff
 4. [ ] Add API response caching where applicable
 5. [ ] Create monitoring/alerting for failed API calls
@@ -223,7 +222,7 @@ curl -X POST http://localhost:3000/api/chat \
 5. [ ] Create admin dashboard for logs
 
 ### 🔵 LOW PRIORITY (Nice to Have)
-1. [ ] Add OpenAI cost tracking
+1. [ ] Add Gemini cost tracking
 2. [ ] Implement usage analytics
 3. [ ] Create admin API for data management
 4. [ ] Add data export functionality
@@ -237,7 +236,7 @@ Before deploying to production:
 
 - [ ] All RPC functions created in Supabase
 - [ ] RLS policies enabled and tested
-- [ ] Environment variables configured (OPENAI_API_KEY, Supabase URLs, keys)
+- [ ] Environment variables configured (GOOGLE_API_KEY, Supabase URLs, keys)
 - [ ] All API endpoints tested (see TESTING.md)
 - [ ] Error scenarios tested (missing keys, invalid data, etc.)
 - [ ] Logging verified in production environment

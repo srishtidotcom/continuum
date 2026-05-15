@@ -10,7 +10,6 @@ export const API_ROUTES = {
   SEARCH: '/api/search',
   CHAT: '/api/chat',
   TASKS: '/api/tasks',
-  TRANSCRIBE: '/api/transcribe',
   METADATA: '/api/metadata'
 } as const
 
@@ -27,11 +26,15 @@ export const RPC_FUNCTIONS = {
   SEARCH_MEMORIES: 'search_memories_by_embedding'
 } as const
 
-// OpenAI models
-export const OPENAI_MODELS = {
-  EMBEDDING: 'text-embedding-3-small',
-  CHAT: 'gpt-4o-mini',
-  WHISPER: 'whisper-1'
+// Gemini models
+export const GEMINI_MODELS = {
+  EMBEDDING: 'gemini-embedding-001',
+  CHAT: 'gemini-2.5-flash'
+} as const
+
+export const GEMINI_CONFIG = {
+  // Keep this aligned with db/schema.sql vector(1536).
+  EMBEDDING_DIMENSIONS: 1536
 } as const
 
 // Similarity thresholds for semantic search
@@ -49,14 +52,14 @@ export const SEARCH_TYPES = {
 
 // Task extraction
 export const TASK_CONFIG = {
-  MODEL: 'gpt-4o-mini',
+  MODEL: GEMINI_MODELS.CHAT,
   TEMPERATURE: 0.3, // Precise for task extraction
   MAX_TOKENS: 300
 } as const
 
 // Chat configuration
 export const CHAT_CONFIG = {
-  MODEL: 'gpt-4o-mini',
+  MODEL: GEMINI_MODELS.CHAT,
   TEMPERATURE: 0.7, // Balanced for conversational tone
   MAX_TOKENS: 500,
   MEMORY_THRESHOLD: SIMILARITY_THRESHOLDS.CHAT_CONTEXT,
@@ -80,14 +83,12 @@ export const ERROR_MESSAGES = {
   EMPTY_QUERY: 'Empty query',
   EMPTY_MESSAGE: 'Empty message',
   EMPTY_TEXT: 'Empty text',
-  MISSING_FILE: 'Audio file is required',
-  OPENAI_NOT_CONFIGURED: 'OpenAI API key not configured',
+  GEMINI_NOT_CONFIGURED: 'Gemini API key not configured',
   EMBEDDING_FAILED: 'Failed to generate embedding',
   SEARCH_FAILED: 'Failed to retrieve memories',
   CHAT_FAILED: 'Failed to generate response',
   MEMORY_RETRIEVAL_FAILED: 'Failed to retrieve relevant memories',
   CHAT_GENERATION_FAILED: 'Failed to generate chat response',
-  TRANSCRIPTION_FAILED: 'Failed to transcribe audio',
   DATABASE_ERROR: 'Database operation failed',
   INVALID_RESPONSE: 'Invalid response from AI service'
 } as const

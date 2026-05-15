@@ -15,17 +15,12 @@ export default function Input() {
   const [text, setText] = useState('')
   const [halfBaked, setHalfBaked] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [isRecording, setIsRecording] = useState(false)
-  const [transcribing, setTranscribing] = useState(false)
-  const [ariaMessage, setAriaMessage] = useState('')
   const [linkMetadata, setLinkMetadata] = useState<LinkMetadata[]>([])
   const [placeholder] = useState(() => {
     const options = ['Dump your brain here...', "What's on your mind?", 'Half-formed thoughts welcome.']
     return options[Math.floor(Math.random() * options.length)]
   })
   const { addToast } = useToast()
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const chunksRef = useRef<Blob[]>([])
   const textRef = useRef('')
   const submittingRef = useRef(false)
 
@@ -64,83 +59,6 @@ export default function Input() {
     // Check for links in the new text
     if (newText.includes('http')) {
       extractLinkMetadata(newText)
-    }
-  }
-
-  // Start voice recording
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const mediaRecorder = new MediaRecorder(stream)
-      mediaRecorderRef.current = mediaRecorder
-      chunksRef.current = []
-
-      mediaRecorder.ondataavailable = (e) => {
-        chunksRef.current.push(e.data)
-      }
-
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' })
-        setAriaMessage('Recording stopped. Transcribing audio and saving.')
-        await transcribeAudio(audioBlob)
-        stream.getTracks().forEach((track) => track.stop())
-      }
-
-      mediaRecorder.start()
-      setIsRecording(true)
-      setAriaMessage('Recording started')
-    } catch (err) {
-      console.error('Error accessing microphone:', err)
-      addToast('Could not access microphone. Please check permissions.', 'error', 6000)
-    }
-  }
-
-  // Stop voice recording
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop()
-      setIsRecording(false)
-    }
-  }
-
-  // Transcribe audio using Whisper
-  const transcribeAudio = async (audioBlob: Blob) => {
-    setTranscribing(true)
-    setAriaMessage('Transcribing audio')
-    try {
-      const formData = new FormData()
-      formData.append('audio', audioBlob, 'audio.webm')
-
-      const response = await fetch('/api/transcribe', {
-        method: 'POST',
-        body: formData
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        // Append transcribed text to existing text
-        const existingText = textRef.current
-        const newText = existingText + (existingText ? ' ' : '') + data.text
-        setText(newText)
-        textRef.current = newText
-        
-        // Extract metadata if there are links
-        if (newText.includes('http')) {
-          await extractLinkMetadata(newText)
-        }
-        await submit(undefined, newText)
-        setAriaMessage('Transcription completed and saved')
-      } else {
-        const error = await response.json()
-        addToast(`Transcription failed: ${error.error || 'Unknown error'}`, 'error', 6000)
-        setAriaMessage('Transcription failed')
-      }
-    } catch (err) {
-      console.error('Error transcribing:', err)
-      addToast('Failed to transcribe audio. Make sure OPENAI_API_KEY is set.', 'error', 6000)
-      setAriaMessage('Transcription failed')
-    } finally {
-      setTranscribing(false)
     }
   }
 
@@ -227,35 +145,6 @@ export default function Input() {
               Half-baked
             </label>
 
-            {/* Voice input button */}
-            <button
-              type="button"
-              onClick={isRecording ? stopRecording : startRecording}
-              disabled={transcribing}
-              aria-pressed={isRecording}
-              aria-label={isRecording ? 'Stop recording' : transcribing ? 'Transcribing' : 'Start voice input'}
-              className={`inline-flex h-9 items-center rounded-[var(--radius-soft)] border px-3 text-sm ${
-                isRecording
-                  ? 'border-red-300/30 bg-red-500/15 text-red-100'
-                  : transcribing
-                    ? 'border-[color:var(--color-border)] bg-white/[0.04] text-[color:var(--color-faint)]'
-                    : 'border-[color:var(--color-border)] bg-white/[0.035] text-[color:var(--color-muted)] hover:border-[color:var(--color-border-strong)] hover:text-[color:var(--color-text)]'
-              }`}
-            >
-              {transcribing ? (
-                <>Transcribing...</>
-              ) : isRecording ? (
-                <>
-                  <span className="mr-2 inline-block h-2 w-2 rounded-full bg-red-200" aria-hidden="true" />
-                  Recording
-                </>
-              ) : (
-                <>
-                  <span className="mr-2 inline-block h-2 w-2 rounded-full bg-[color:var(--color-accent)]/70" aria-hidden="true" />
-                  Voice
-                </>
-              )}
-            </button>
           </div>
 
           {/* Save button */}
@@ -273,11 +162,6 @@ export default function Input() {
           </div>
         </div>
       </form>
-
-      {/* ARIA live region for announcing recording/transcription status */}
-      <div aria-live="polite" className="sr-only">
-        {ariaMessage}
-      </div>
     </div>
   )
 }

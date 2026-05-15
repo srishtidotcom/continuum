@@ -31,23 +31,29 @@ export interface LLMTaskResponse {
  * @returns Array of validated tasks or empty array if invalid
  */
 export function validateTaskResponse(response: unknown): ExtractedTask[] {
-  if (!response || typeof response !== 'object') {
-    console.warn('Invalid task response: not an object', response)
+  if (!response) {
+    console.warn('Invalid task response: empty response', response)
     return []
   }
 
-  const llmResponse = response as LLMTaskResponse
+  // Accept either an array of tasks or an object with a `tasks` array
+  let tasksArray: any[] | undefined
+  if (Array.isArray(response)) {
+    tasksArray = response as any[]
+  } else if (typeof response === 'object' && Array.isArray((response as any).tasks)) {
+    tasksArray = (response as any).tasks
+  }
 
-  if (!Array.isArray(llmResponse.tasks)) {
-    console.warn('Invalid task response: tasks is not an array', llmResponse)
+  if (!tasksArray) {
+    console.warn('Invalid task response: tasks not found or not an array', response)
     return []
   }
 
   const validatedTasks: ExtractedTask[] = []
 
-  for (const task of llmResponse.tasks) {
+  for (const task of tasksArray) {
     // Validate required fields
-    if (!task.title || typeof task.title !== 'string' || !task.title.trim()) {
+    if (!task || !task.title || typeof task.title !== 'string' || !task.title.trim()) {
       console.warn('Skipping task with invalid title:', task)
       continue
     }

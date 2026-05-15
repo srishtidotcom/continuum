@@ -37,7 +37,6 @@ Make it frictionless to dump information into a persistent, intelligent conversa
 
 2. Unified Thought Input
    - Single input field: “Dump your brain here…”
-   - Voice input (Whisper)
    - Paste support for text and links
    - Auto-save
    - Optional `half-baked` flag for unfinished thoughts
@@ -48,7 +47,7 @@ Make it frictionless to dump information into a persistent, intelligent conversa
    - Fast keyword + semantic search
 
 4. Semantic Memory Retrieval
-   - Embedding-based similarity search (text-embedding-3-small)
+   - Embedding-based similarity search (Gemini embedding)
    - Contextual injection into conversations
    - Gentle discovery hints (e.g., “Related thought from 12 days ago”)
 
@@ -86,9 +85,8 @@ Make it frictionless to dump information into a persistent, intelligent conversa
 - Frontend: Next.js 15 (App Router), Tailwind CSS, shadcn/ui
 - Backend: Next.js API routes / Server Actions
 - Database: Supabase (Postgres + pgvector)
-- Embeddings: text-embedding-3-small
-- LLM: GPT-4o / GPT-4o-mini (cost-aware usage)
-- Speech-to-text: Whisper (local or API)
+- Embeddings: Gemini Embedding (`gemini-embedding-001`, 1536 dimensions)
+- LLM: Gemini (`gemini-2.5-flash`, cost-aware usage)
 - Deployment: Vercel + Supabase
 
 ## UI / UX direction

@@ -6,7 +6,7 @@ Quick guide to test the new features locally.
 
 1. Ensure environment variables are set:
    ```bash
-   OPENAI_API_KEY=sk-...
+   GOOGLE_API_KEY=...
    LOCAL_USER_ID=<your-test-uuid>  # for local testing
    ```
 
@@ -211,7 +211,7 @@ time curl -X POST http://localhost:3000/api/chat \
 2. **Invalid user ID**
    - Chat/Tasks returns: 401 Unauthorized
 
-3. **Missing OpenAI key**
+3. **Missing Gemini key**
    - Chat returns: 500 with error message
    - Tasks extraction skipped
 
@@ -229,20 +229,20 @@ time curl -X POST http://localhost:3000/api/chat \
 
 ### Chat not returning memories?
 Check:
-- OpenAI API key is valid
-- Embedding API is working: `curl https://api.openai.com/v1/models -H "Authorization: Bearer $OPENAI_API_KEY"`
+- Gemini API key is valid
+- Embedding API is working: `curl https://generativelanguage.googleapis.com/v1/models?key=$GOOGLE_API_KEY`
 - pgvector installed in Postgres
 - `search_memories_by_embedding` RPC function exists
 
 ### Tasks not extracting?
 Check:
 - Memory text contains task keywords
-- OpenAI API key is set
+- Gemini API key is set
 - Task table exists in database
 - Check server logs for LLM response
 
 ### Performance issues?
-- Chat is I/O bound (check OpenAI API latency)
+- Chat is I/O bound (check Gemini API latency)
 - Consider response streaming for large contexts (future feature)
 - Task extraction only on keyword match (cost optimization working)
 

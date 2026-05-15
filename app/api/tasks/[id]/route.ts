@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { serverSupabase } from '../../../../lib/serverSupabase'
-import { getUserIdFromRequest } from '../../../../lib/auth'
+import { extractUserId } from '../../../../lib/authUtils'
 
 interface UpdateTaskBody {
   completed?: boolean
@@ -40,8 +40,7 @@ export async function PATCH(
       )
     }
 
-    let userId = await getUserIdFromRequest(request)
-    if (!userId) userId = request.headers.get('x-user-id') || process.env.LOCAL_USER_ID || null
+    const userId = await extractUserId(request)
 
     if (!userId) {
       return NextResponse.json(

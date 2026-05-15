@@ -132,8 +132,8 @@ export default function Chat() {
         addToast('Request timed out. Please try again.', 'error', 6000)
       } else if (errorMsg.includes('Failed to retrieve memories')) {
         addToast('Could not retrieve memories. Semantic search may not be available.', 'error', 6000)
-      } else if (errorMsg.includes('OpenAI')) {
-        addToast('OpenAI API error. Please try again.', 'error', 6000)
+      } else if (errorMsg.includes('Gemini')) {
+        addToast('Gemini API error. Please try again.', 'error', 6000)
       } else {
         addToast(errorMsg, 'error', 6000)
       }

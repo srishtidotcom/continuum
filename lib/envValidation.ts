@@ -15,7 +15,7 @@ interface EnvValidationResult {
  */
 export function validateEnvironment(): EnvValidationResult {
   const required = ['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY']
-  const recommended = ['OPENAI_API_KEY', 'NEXT_PUBLIC_SUPABASE_ANON_KEY']
+  const recommended = ['GEMINI_API_KEY', 'NEXT_PUBLIC_SUPABASE_ANON_KEY']
   const optional = ['LOCAL_USER_ID']
 
   const missing: string[] = []
@@ -60,11 +60,11 @@ export function assertEnvironment(): void {
 }
 
 /**
- * Get OpenAI API key from environment
+ * Get Gemini API key from environment
  * Returns null if not configured (graceful degradation)
  */
-export function getOpenAIApiKey(): string | null {
-  return process.env.OPENAI_API_KEY || null
+export function getGeminiApiKey(): string | null {
+  return process.env.GEMINI_API_KEY || null
 }
 
 /**
@@ -75,8 +75,8 @@ export function getLocalUserId(): string | null {
 }
 
 /**
- * Check if OpenAI features are available
+ * Check if Gemini features are available
  */
-export function hasOpenAISupport(): boolean {
-  return !!process.env.OPENAI_API_KEY
+export function hasGeminiSupport(): boolean {
+  return !!process.env.GEMINI_API_KEY
 }

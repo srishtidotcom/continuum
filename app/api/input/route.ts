@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { serverSupabase } from '../../../lib/serverSupabase'
 import { extractTasksFromMemory, detectTaskKeywords } from '../../../lib/taskExtraction'
-import { generateEmbedding } from '../../../lib/openaiUtils'
-import { getOpenAIApiKey } from '../../../lib/envValidation'
+import { generateEmbedding } from '../../../lib/geminiUtils'
+import { getGeminiApiKey } from '../../../lib/envValidation'
 import { logger } from '../../../lib/logger'
 import { extractUserId } from '../../../lib/authUtils'
 import { API_ROUTES, DB_TABLES, ERROR_MESSAGES, HTTP_STATUS } from '../../../lib/constants'
@@ -59,15 +59,15 @@ export async function POST(request: Request) {
     let embeddingError: string | null = null
 
     // 2) Try to create embedding (non-blocking failure)
-    const openaiKey = getOpenAIApiKey()
-    if (openaiKey && mem?.id) {
-      const { embedding: emb, error: embError } = await generateEmbedding(text, openaiKey)
+    const geminiKey = getGeminiApiKey()
+    if (geminiKey && mem?.id) {
+      const { embedding: emb, error: embError } = await generateEmbedding(text, geminiKey, 'RETRIEVAL_DOCUMENT')
       
       if (embError) {
-        logger.logExternalApi('OpenAI', 'embeddings', false, embError)
+        logger.logExternalApi('Gemini', 'embeddings', false, embError)
         embeddingError = embError
       } else if (emb) {
-        logger.logExternalApi('OpenAI', 'embeddings', true)
+        logger.logExternalApi('Gemini', 'embeddings', true)
         
         // 3) Persist embedding if available
         const { error: embDbErr } = await serverSupabase
@@ -85,9 +85,9 @@ export async function POST(request: Request) {
 
     // 4) Improved task extraction using NLP (non-blocking)
     let taskError: string | null = null
-    if (openaiKey && detectTaskKeywords(text)) {
+    if (geminiKey && detectTaskKeywords(text)) {
       try {
-        const rawTasks = await extractTasksFromMemory(text, openaiKey)
+        const rawTasks = await extractTasksFromMemory(text, geminiKey)
         // Validate task response before using
         const extractedTasks = validateTaskResponse(rawTasks)
 

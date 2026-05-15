@@ -11,7 +11,7 @@
 NEXT_PUBLIC_SUPABASE_URL=https://xyz.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=public-anon-key
 SUPABASE_SERVICE_ROLE_KEY=service-role-key
-OPENAI_API_KEY=sk-...
+GEMINI_API_KEY=...
 ```
 
 3) Client vs Server keys

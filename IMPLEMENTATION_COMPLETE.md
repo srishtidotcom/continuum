@@ -81,7 +81,7 @@ Successfully implemented two key MVP features for Continuum:
 ```
 User Query
     ↓
-Generate Embedding (OpenAI text-embedding-3-small)
+Generate Embedding (Gemini embedding-001)
     ↓
 Semantic Search (pgvector cosine similarity, threshold: 0.3)
     ↓
@@ -106,7 +106,7 @@ Generate Embedding (part of input flow)
 Detect Task Keywords (local, instant)
     ↓
 If Keywords Found:
-    - Call GPT-4o-mini
+    - Call Gemini LLM
     - Extract: title, due_date, description
     - Validate & sanitize
     ↓
@@ -149,7 +149,7 @@ Save Extracted Tasks to DB (with memory_id link)
 
 ### Required Environment Variables
 ```
-OPENAI_API_KEY=sk-... (for embeddings & LLM)
+GOOGLE_API_KEY=... (for embeddings & LLM)
 LOCAL_USER_ID=<uuid> (for local testing, optional)
 ```
 
@@ -297,14 +297,14 @@ Post-MVP features:
 ## Troubleshooting
 
 ### Chat not working
-- Check OPENAI_API_KEY is set
-- Verify OpenAI API is accessible
+- Check GOOGLE_API_KEY is set
+- Verify Gemini API is accessible
 - Check that embeddings are being generated for memories
 - Ensure pgvector RPC function exists
 
 ### Tasks not extracting
 - Ensure memory text contains task keywords
-- Check OpenAI API key
+- Check Gemini API key
 - Verify tasks table exists
 - Check server logs for LLM response
 

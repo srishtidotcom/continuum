@@ -2,17 +2,16 @@
 
 ## ✅ Issues Fixed
 
-### 1. **Request Timeouts on OpenAI API Calls**
-**File:** `lib/openaiUtils.ts`
+### 1. **Request Timeouts on Gemini API Calls**
+**File:** `lib/geminiUtils.ts`
 
-Added timeout support to all OpenAI API calls:
+Added timeout support to all Gemini API calls:
 - **Embeddings:** 20 second timeout (fast operations)
 - **Chat:** 60 second timeout (slower LLM operations)
-- **Whisper:** 60 second timeout (audio processing)
 
 **Before:**
 ```typescript
-await fetch('https://api.openai.com/v1/embeddings', {
+await fetch('https://generativelanguage.googleapis.com/v1beta/models/embedding-001:embedContent', {
   method: 'POST',
   // ... no timeout, can hang indefinitely
 })
@@ -20,7 +19,7 @@ await fetch('https://api.openai.com/v1/embeddings', {
 
 **After:**
 ```typescript
-await fetchWithTimeout('https://api.openai.com/v1/embeddings', {
+await fetchWithTimeout('https://generativelanguage.googleapis.com/v1beta/models/embedding-001:embedContent', {
   method: 'POST',
   timeout: EMBEDDING_TIMEOUT_MS // 20 seconds
 })
@@ -61,8 +60,8 @@ if (memErr) return error // Fail if memory save fails
 
 // 2) Non-blocking embedding attempt
 let embeddingError: string | null = null
-if (openaiKey && mem?.id) {
-  const { embedding, error } = await generateEmbedding(text, openaiKey)
+if (geminiKey && mem?.id) {
+  const { embedding, error } = await generateEmbedding(text, geminiKey)
   if (error) {
     embeddingError = error // Log but don't fail
   } else if (embedding) {
@@ -118,8 +117,8 @@ async function submit(e?: React.FormEvent) {
     addToast('Request timed out. Please try again.', 'error', 6000)
   } else if (errorMsg.includes('Failed to retrieve memories')) {
     addToast('Could not retrieve memories. Semantic search may not be available.', 'error', 6000)
-  } else if (errorMsg.includes('OpenAI')) {
-    addToast('OpenAI API error. Please try again.', 'error', 6000)
+  } else if (errorMsg.includes('Gemini')) {
+    addToast('Gemini API error. Please try again.', 'error', 6000)
   } else {
     addToast(errorMsg, 'error', 6000)
   }
@@ -196,7 +195,7 @@ const response = await fetchWithRetry('/api/memories', {
 | **Data Loss** | Memory lost if embedding fails | Memory saved, embedding failure logged | Data integrity guaranteed |
 | **User Feedback** | Silent failures in console | Toast notifications for all errors | Users always know what failed |
 | **Retry Logic** | No retry on transient failures | Automatic exponential backoff retry | Handles network flakiness |
-| **Error Messages** | Generic "Failed" message | Specific error messages (timeout, OpenAI, etc.) | Better UX |
+| **Error Messages** | Generic "Failed" message | Specific error messages (timeout, Gemini, etc.) | Better UX |
 
 ---
 
@@ -243,7 +242,7 @@ curl -X POST http://localhost:3000/api/input \
 ### Test 2: User Feedback
 1. Start dev server: `npm run dev`
 2. Open app in browser
-3. Try to save without OPENAI_API_KEY set
+3. Try to save without GOOGLE_API_KEY set
 4. You should see error toast: "Memory saved, but some features failed"
 5. Memory is in database but no embedding created
 
@@ -264,12 +263,12 @@ curl -X POST http://localhost:3000/api/input \
 4. ✅ **Retry logic** - DONE (lib/retryUtils.ts available for use)
 5. [ ] **Apply retry logic to routes** - Use `withRetry()` wrapper in API routes
 6. [ ] **Connection pooling** - For database operations
-7. [ ] **Request queuing** - For OpenAI API (respect rate limits)
+7. [ ] **Request queuing** - For Gemini API (respect rate limits)
 
 ### Medium Priority
 8. [ ] **Detailed error codes** - Map errors to specific error types
 9. [ ] **Error analytics** - Track which operations fail most
-10. [ ] **Graceful degradation** - Work without OpenAI when possible
+10. [ ] **Graceful degradation** - Work without Gemini when possible
 11. [ ] **Offline support** - Queue operations when offline
 
 ### Lower Priority
@@ -281,7 +280,7 @@ curl -X POST http://localhost:3000/api/input \
 
 ## Code Files Modified
 
-1. ✅ `lib/openaiUtils.ts` - Added timeouts to all OpenAI calls
+1. ✅ `lib/geminiUtils.ts` - Added timeouts to all Gemini calls
 2. ✅ `lib/retryUtils.ts` - New retry utility (not yet integrated)
 3. ✅ `app/api/input/route.ts` - Cascade failure prevention
 4. ✅ `components/Input.tsx` - Error toasts on save failures

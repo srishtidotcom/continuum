@@ -20,7 +20,7 @@ curl -X POST http://localhost:3000/api/input \
   -H "x-user-id: 550e8400-e29b-41d4-a716-446655440000" \
   -H "Content-Type: application/json" \
   -d '{
-    "text": "Exploring embeddings for semantic search. Using text-embedding-3-small from OpenAI for cost efficiency.",
+    "text": "Exploring embeddings for semantic search. Using Gemini embedding-001 for cost efficiency.",
     "halfBaked": false,
     "metadata": { "source": "notes" }
   }'
@@ -77,7 +77,7 @@ curl -X POST http://localhost:3000/api/search \
     "limit": 10
   }'
 
-// Example 2: Semantic search (requires OPENAI_API_KEY)
+// Example 2: Semantic search (requires GOOGLE_API_KEY)
 curl -X POST http://localhost:3000/api/search \
   -H "x-user-id: 550e8400-e29b-41d4-a716-446655440000" \
   -H "Content-Type: application/json" \
@@ -249,7 +249,7 @@ curl -X POST http://localhost:3000/api/search \
   -d '{ "query": "" }'
 // Expected: 400 Bad Request
 
-// Test 3: Missing OPENAI_API_KEY for semantic search
+// Test 3: Missing GOOGLE_API_KEY for semantic search
 curl -X POST http://localhost:3000/api/search \
   -H "x-user-id: 550e8400-e29b-41d4-a716-446655440000" \
   -H "Content-Type: application/json" \

@@ -120,7 +120,7 @@ Authentication
       "type": "keyword"
     }'
   
-  # Semantic search (requires OpenAI API key)
+  # Semantic search (requires Gemini API key)
   curl -X POST http://localhost:3000/api/search \
     -H "Authorization: Bearer <token>" \
     -H "Content-Type: application/json" \
@@ -152,11 +152,11 @@ Authentication
 
 ## Implementation Notes
 
-- **Embeddings**: Use `text-embedding-3-small` (1536 dimensions). Stored in pgvector.
+- **Embeddings**: Use Gemini Embedding (`gemini-embedding-001`) with 1536 dimensions. Stored in pgvector.
 - **Vector Search**: Uses pgvector cosine similarity (`<=>` operator). IVFFlat index for performance.
 - **Keyword Search**: PostgreSQL ILIKE for case-insensitive matching.
 - **RPC Function**: `search_memories_by_embedding()` — defined in `db/schema.sql`, handles user isolation and similarity filtering.
-- **Cost Optimization**: OpenAI embedding API called on capture and search. Cache results where possible.
+- **Cost Optimization**: Gemini embedding API called on capture and search. Cache results where possible.
 - **User Isolation**: All queries filtered by `user_id` from JWT token.
 
 ## Database Schema
@@ -176,7 +176,7 @@ NEXT_PUBLIC_SUPABASE_URL          # Supabase project URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY     # Supabase anon key (client-side)
 SUPABASE_URL                      # (Server-side, defaults to NEXT_PUBLIC_SUPABASE_URL)
 SUPABASE_SERVICE_ROLE_KEY         # Supabase service role key (server-side DB access)
-OPENAI_API_KEY                    # For embeddings & future LLM calls
+GEMINI_API_KEY                    # For embeddings & LLM calls
 LOCAL_USER_ID                     # (Dev only) Fallback user ID for testing without auth
 ```
 
@@ -184,5 +184,5 @@ Security
 - Enforce per-user isolation on all queries; use RLS policies in production with Supabase.
 
 Next steps
-- Wire up `POST /api/input` to call OpenAI embeddings and persist vector rows.
+- Wire up `POST /api/input` to call Gemini embeddings and persist vector rows.
 - Add background job or edge function to run heavier processing (task extraction, link metadata).

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { serverSupabase } from '../../../lib/serverSupabase'
-import { getUserIdFromRequest } from '../../../lib/auth'
+import { extractUserId } from '../../../lib/authUtils'
 
 /**
  * GET /api/tasks
@@ -33,8 +33,7 @@ export async function GET(request: Request) {
     const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 100)
     const offset = Math.max(parseInt(url.searchParams.get('offset') || '0'), 0)
 
-    let userId = await getUserIdFromRequest(request)
-    if (!userId) userId = request.headers.get('x-user-id') || process.env.LOCAL_USER_ID || null
+    const userId = await extractUserId(request)
 
     if (!userId) {
       return NextResponse.json(

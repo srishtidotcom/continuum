@@ -114,7 +114,7 @@ class Logger {
   }
 
   /**
-   * Log external API call (OpenAI, etc)
+   * Log external API call (Gemini, etc)
    */
   logExternalApi(service: string, method: string, success: boolean, error?: Error | string): void {
     if (success) {
